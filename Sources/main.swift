@@ -33,6 +33,9 @@ routes.add(method: .get, uri: "/sumClickList", handler: {
 }
 )
 
+
+addURLRoutes()
+
 // 将路由注册到服务器上
 server.addRoutes(routes)
 
