@@ -1,0 +1,32 @@
+{
+  "": {
+    "dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/PerfectNet.d",
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/PerfectNet.o",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/master.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/Net.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/Net.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectNet.build/Net~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/Net.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetEvent.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/NetEvent.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectNet.build/NetEvent~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/NetEvent.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetNamedPipe.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/NetNamedPipe.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectNet.build/NetNamedPipe~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/NetNamedPipe.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetTCP.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCP.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCP~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCP.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetTCPSSL.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCPSSL.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCPSSL~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectNet.build/NetTCPSSL.swiftdeps"
+  }
+}

@@ -11,6 +11,7 @@ import PerfectHTTP
 import PerfectHTTPServer
 import MongoDB
 
+
 func addURLRoutes() {
     routes.add(uri: "/test", handler: testHandler)
     routes.add(uri: "/mongo", handler: mongoHandler)
@@ -30,13 +31,13 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
 func mongoHandler(request: HTTPRequest, _ response: HTTPResponse) {
     
     // 创建连接
-    let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018")
+    let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
     
     // 连接到具体的数据库，假设有个数据库名字叫 test
     let db = client.getDatabase(name: "rosbookworm")
     
     // 定义集合
-    guard let collection = db.getCollection(name: "bookworm") else {
+    guard let collection = db.getCollection(name: "bookinfo") else {
         return
     }
     

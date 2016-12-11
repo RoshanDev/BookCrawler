@@ -13,6 +13,10 @@ public class Book {
     var author: String?
     var img: String?
     var href: String?
+    var info: String?
+    init() {
+        
+    }
     init(name: String?, author: String?, img: String?, href: String?) {
         self.name = name
         self.author = author

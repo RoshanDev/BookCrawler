@@ -1,0 +1,9 @@
+version: "Swift version 3.0.1 (swift-3.0.1-RELEASE)"
+options: "1731ea4fbb8745d3df74921b4850fb7d"
+build_time: [534754596, 798966000]
+inputs:
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/Net.swift": [9223372036854775807, 0]
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetEvent.swift": [9223372036854775807, 0]
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetNamedPipe.swift": [9223372036854775807, 0]
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetTCP.swift": [9223372036854775807, 0]
+  "/perfectbuild/Packages/PerfectNet-2.0.5/Sources/NetTCPSSL.swift": [9223372036854775807, 0]

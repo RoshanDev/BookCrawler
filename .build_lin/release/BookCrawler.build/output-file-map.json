@@ -1,0 +1,27 @@
+{
+  "": {
+    "dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/BookCrawler.d",
+    "object": "/perfectbuild/.build_lin/release/BookCrawler.build/BookCrawler.o",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/master.swiftdeps"
+  },
+  "/perfectbuild/Sources/Book.swift": {
+    "object": "/perfectbuild/.build_lin/release/BookCrawler.build/Book.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/BookCrawler.build/Book~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/Book.swiftdeps"
+  },
+  "/perfectbuild/Sources/CrawLib.swift": {
+    "object": "/perfectbuild/.build_lin/release/BookCrawler.build/CrawLib.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/BookCrawler.build/CrawLib~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/CrawLib.swiftdeps"
+  },
+  "/perfectbuild/Sources/main.swift": {
+    "object": "/perfectbuild/.build_lin/release/BookCrawler.build/main.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/BookCrawler.build/main~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/main.swiftdeps"
+  },
+  "/perfectbuild/Sources/routingHandlers.swift": {
+    "object": "/perfectbuild/.build_lin/release/BookCrawler.build/routingHandlers.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/BookCrawler.build/routingHandlers~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/BookCrawler.build/routingHandlers.swiftdeps"
+  }
+}

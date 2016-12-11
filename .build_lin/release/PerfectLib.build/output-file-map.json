@@ -1,0 +1,57 @@
+{
+  "": {
+    "dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectLib.d",
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectLib.o",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/master.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/Bytes.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/Bytes.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/Bytes~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/Bytes.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/Dir.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/Dir.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/Dir~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/Dir.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/File.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/File.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/File~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/File.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/JSONConvertible.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/JSONConvertible.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/JSONConvertible~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/JSONConvertible.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/Log.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/Log.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/Log~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/Log.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/PerfectError.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectError.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectError~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectError.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/PerfectServer.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectServer.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectServer~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/PerfectServer.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/SwiftCompatibility.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/SwiftCompatibility.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/SwiftCompatibility~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/SwiftCompatibility.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/SysProcess.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/SysProcess.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/SysProcess~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/SysProcess.swiftdeps"
+  },
+  "/perfectbuild/Packages/PerfectLib-2.0.4/Sources/PerfectLib/Utilities.swift": {
+    "object": "/perfectbuild/.build_lin/release/PerfectLib.build/Utilities.swift.o",
+    "swiftmodule": "/perfectbuild/.build_lin/release/PerfectLib.build/Utilities~partial.swiftmodule",
+    "swift-dependencies": "/perfectbuild/.build_lin/release/PerfectLib.build/Utilities.swiftdeps"
+  }
+}

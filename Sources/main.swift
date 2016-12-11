@@ -16,25 +16,39 @@ routes.add(method: .get, uri: "/", handler: {
 )
 
 routes.add(method: .get, uri: "/sumClickList", handler: {
-    request, response in
-    let crawLib = CrawLib()
-    let jsonDic = CrawLib.crawSumClickList()
+        request, response in
     
-    response.setHeader(.contentType, value: "application/json")
-    
-    do {
-        try response.setBody(json: jsonDic)
-    } catch  {
-        print("setBody failed")
+        let jsonDic = CrawLib.crawSumClickList()
+        
+        response.setHeader(.contentType, value: "application/json")
+        
+        do {
+            try response.setBody(json: jsonDic)
+        } catch  {
+            print("setBody failed")
+        }
+        response.completed()
     }
-    
-    
-    response.completed()
-}
 )
 
+routes.add(method: .get, uri: "/detailInfo", handler: {
+        request, response in
+        
+        let jsonDic = CrawLib.detailInfo()
+        
+        response.setHeader(.contentType, value: "application/json")
+        
+        do {
+            try response.setBody(json: jsonDic)
+        } catch  {
+            print("setBody failed")
+        }
+        response.completed()
+    }
+)
 
 addURLRoutes()
+
 
 // 将路由注册到服务器上
 server.addRoutes(routes)
