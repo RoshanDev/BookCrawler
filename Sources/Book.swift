@@ -14,6 +14,8 @@ public class Book {
     var img: String?
     var href: String?
     var info: String?
+    var latestUpdateInfo: String?
+    var latestUpdateDate: String?
     init() {
         
     }

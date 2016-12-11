@@ -47,6 +47,23 @@ routes.add(method: .get, uri: "/detailInfo", handler: {
     }
 )
 
+routes.add(method: .get, uri: "/chapterInfo", handler: {
+        request, response in
+        
+        let jsonDic = CrawLib.chapterInfo()
+        
+        response.setHeader(.contentType, value: "application/json")
+        
+        do {
+            try response.setBody(json: jsonDic)
+        } catch  {
+            print("setBody failed")
+        }
+        response.completed()
+    }
+)
+
+
 addURLRoutes()
 
 
