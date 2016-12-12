@@ -194,7 +194,21 @@ public class CrawLib {
 
     //爬取书籍目录信息
     static func crawBookChapterInfo(name: String, html: String) {
+        let doc = HTML(html: html, encoding: .utf8)
+        if doc == nil {
+            return
+        }
         
+        //先取出卷信息
+        let volumeXpath = "//DIV[@class='clearfix dirconone']"
+        
+        for volumeElement in (doc?.xpath(volumeXpath))! {
+            let chapterXpath = "//li/a"
+            for chapterElement in volumeElement.xpath(chapterXpath) {
+                print("chapter \(chapterElement.text)")
+            }
+//            print(volumeElement)
+        }
     }
     
     static func showResponse(code: Int, message: String, data: Dictionary<String, Any>?)-> Dictionary<String, Any>{

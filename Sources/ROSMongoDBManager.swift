@@ -66,13 +66,13 @@ class ROSMongoDBManager {
         let result: MongoResult = (collection?.remove(selector: removeBSON))!
         switch result {
         case .success:
-            return
+            break
         default:
             return
         }
         
         
-        collection?.insert(documents: <#T##[BSON]#>)
+//        collection?.insert(documents: <#T##[BSON]#>)
         print("哈哈哈")
         
     }
