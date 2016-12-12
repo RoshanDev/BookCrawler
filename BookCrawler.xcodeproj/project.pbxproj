@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		010090311DFE72D10095778D /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010090301DFE72D10095778D /* Chapter.swift */; };
 		OBJ_1000 /* dso_win32.c in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_228 /* dso_win32.c */; };
 		OBJ_1001 /* e_4758cca.c in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_229 /* e_4758cca.c */; };
 		OBJ_1002 /* e_4758cca_err.c in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_230 /* e_4758cca_err.c */; };
@@ -961,6 +962,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		010090301DFE72D10095778D /* Chapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chapter.swift; sourceTree = "<group>"; };
 		OBJ_10 /* Dir.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dir.swift; sourceTree = "<group>"; };
 		OBJ_100 /* bn_mul.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bn_mul.c; sourceTree = "<group>"; };
 		OBJ_101 /* bn_nist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = bn_nist.c; sourceTree = "<group>"; };
@@ -2509,7 +2511,7 @@
 			path = "Packages/COpenSSL-2.0.2/COpenSSL";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -2517,7 +2519,6 @@
 				OBJ_757 /* Tests */,
 				OBJ_758 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -2661,6 +2662,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_752 /* Book.swift */,
+				010090301DFE72D10095778D /* Chapter.swift */,
 				OBJ_753 /* CrawLib.swift */,
 				OBJ_754 /* main.swift */,
 				OBJ_755 /* ROSMongoDBManager.swift */,
@@ -2936,7 +2938,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_758 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -3077,6 +3079,7 @@
 				OBJ_1598 /* Book.swift in Sources */,
 				OBJ_1599 /* CrawLib.swift in Sources */,
 				OBJ_1600 /* main.swift in Sources */,
+				010090311DFE72D10095778D /* Chapter.swift in Sources */,
 				OBJ_1601 /* ROSMongoDBManager.swift in Sources */,
 				OBJ_1602 /* routingHandlers.swift in Sources */,
 			);

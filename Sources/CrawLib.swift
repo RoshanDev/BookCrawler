@@ -62,24 +62,24 @@ public class CrawLib {
     }
 
     //章节列表页路由事件
-    static func chapterInfo() -> Dictionary<String, Any> {
-        let crawUri = "http://www.quanshu.net/book/13/13720/"
-        guard let crawUrl = URL(string: crawUri) else {
-            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
-            return CrawLib.showResponse(code: 0, message: message, data: nil)
-        }
+    static func chaptersInfo() -> Dictionary<String, Any> {
+        let book = Book(name: "绝世唐门", author: "唐家三少", img: "http://img.quanshu.net/image/13/13720/13720s.jpg", href: "http://www.quanshu.net/book_13720.html")
+        book.chaptersHref = "http://www.quanshu.net/book/13/13720/"
+
+        CrawLib.crawBookChaptersInfo(bookInfo: book)
+        return ["1":1, "2":2]
+
+    }
+    
+    //章节详情页路由事件
+    static func chapterDetailInfo() -> Dictionary<String, Any> {
+        let book = Book(name: "绝世唐门", author: "唐家三少", img: "http://img.quanshu.net/image/13/13720/13720s.jpg", href: "http://www.quanshu.net/book_13720.html")
+        book.chaptersHref = "http://www.quanshu.net/book/13/13720"
         
-        do {
-            let cfEnc = CFStringEncodings.GB_18030_2000
-            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-            
-            let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-            CrawLib.crawBookChapterInfo(name: crawUri, html: myHTMLString)
-            return ["1":1, "2":2]
-        } catch let error {
-            print("Error: \(error)")
-            return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
-        }
+        let chapter = Chapter(name: "第六百一十九章 第三魂核！（上）", href: "13927343.html", wordCount: 3711)
+        chapter.createTime = 1481525611
+        CrawLib.crawChapterDetailInfo(book: book, chapter: chapter)
+        return ["1":1, "2":2]
     }
     
     
@@ -146,6 +146,10 @@ public class CrawLib {
         let infoElement = doc!.at_xpath(infoXpath)
         let info = infoElement?.text
         
+        let chaptersHrefXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/div[2]/a[1]"
+        let chaptersHrefElement = doc!.at_xpath(chaptersHrefXpath)
+        let chaptersHref = chaptersHrefElement?["href"]
+        
         let latestUpdateXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[5]/dd/ul/li[1]"
         let latestUpdateElement = doc!.at_xpath(latestUpdateXpath)
         
@@ -158,6 +162,7 @@ public class CrawLib {
         }
         let book: Book = Book(name: title, author: author, img: img, href: href)
         book.info = info
+        book.chaptersHref = chaptersHref
         book.latestUpdateInfo = latestUpdateInfo
         book.latestUpdateDate = latestUpdateDate
         
@@ -193,21 +198,96 @@ public class CrawLib {
     }
 
     //爬取书籍目录信息
-    static func crawBookChapterInfo(name: String, html: String) {
-        let doc = HTML(html: html, encoding: .utf8)
-        if doc == nil {
+    static func crawBookChaptersInfo(bookInfo: Book) {
+        
+        guard let crawUrl = URL(string: bookInfo.chaptersHref!) else {
+            let message = "Error: \(bookInfo.chaptersHref!) doesn't seem to be a valid URL"
+            print(message)
             return
         }
         
-        //先取出卷信息
-        let volumeXpath = "//DIV[@class='clearfix dirconone']"
+        let cfEnc = CFStringEncodings.GB_18030_2000
+        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
         
-        for volumeElement in (doc?.xpath(volumeXpath))! {
-            let chapterXpath = "//li/a"
-            for chapterElement in volumeElement.xpath(chapterXpath) {
-                print("chapter \(chapterElement.text)")
+        do {
+            let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
+            let doc = HTML(html: html, encoding: .utf8)
+            if doc == nil {
+                return
             }
-//            print(volumeElement)
+            
+            //先取出卷信息
+            let volumeXpath = "//div[@class='clearfix dirconone']"
+            //接着取出章节信息
+            var chapters = [Chapter]()
+            for volumeElement in (doc?.xpath(volumeXpath))! {
+                // /div/li/a解析不出来
+                let chapterXpath = "li/a"
+                for chapterElement in volumeElement.xpath(chapterXpath) {
+                    let chapterName = chapterElement.text
+                    let href = chapterElement["href"]
+                    
+                    var tempStr = chapterElement["title"]
+                    let tempArr = tempStr?.components(separatedBy: "，")
+                    tempStr = tempArr?.last?.replacingOccurrences(of: "共", with: "").replacingOccurrences(of: "字", with: "")
+                    let wordCount = Int(tempStr!)
+                    let chapter = Chapter.init(name: chapterName, href: href, wordCount: wordCount)
+                    chapter.createTime = CrawLib.timeStamp()
+                    chapter.description()
+                    
+                    chapters.append(chapter)
+                }
+            }
+            
+            ROSMongoDBManager.manager.insertBookChapters(name: bookInfo.name!, chapters: chapters)
+
+        } catch {
+            
+        }
+    }
+    
+    //爬取章节详情信息
+    static func crawChapterDetailInfo(book: Book, chapter: Chapter) {
+        let crawUri = book.chaptersHref! + "/" + chapter.href!
+        
+        guard let crawUrl = URL(string: crawUri) else {
+            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
+            print(message)
+            return
+        }
+        
+        let cfEnc = CFStringEncodings.GB_18030_2000
+        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+        
+        do {
+            let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
+            let doc = HTML(html: html, encoding: .utf8)
+            if doc == nil {
+                return
+            }
+            
+            let contentXpath = "//*[@id=\"content\"]"
+            let contentElement = doc?.at_xpath(contentXpath)
+            
+            var tempContent = contentElement?.text
+            
+            let tempXpath = "script"
+            
+            for tempElement in (contentElement?.xpath(tempXpath))! {
+                tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
+            }
+            
+            chapter.content = tempContent
+            chapter.updateTime = CrawLib.timeStamp()
+            
+            let result = ROSMongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
+            if result {
+                print("更新章节《\(chapter.name!)》数据成功")
+            }else {
+                print("更新章节《\(chapter.name!)》数据失败")
+            }
+        } catch {
+            
         }
     }
     
@@ -222,6 +302,10 @@ public class CrawLib {
         return response
     }
 
+    static func timeStamp() -> Int {
+        let timeInterval:TimeInterval = Date().timeIntervalSince1970
+        return Int(timeInterval)
+    }
     
     func UTF8ToGB2312(str: String) -> (NSData?, UInt) {
        let enc = CFStringConvertEncodingToNSStringEncoding(UInt32(CFStringEncodings.GB_18030_2000.rawValue))
