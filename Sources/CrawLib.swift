@@ -172,6 +172,7 @@ public class CrawLib {
             let imgElement = doc!.at_xpath(imgXpath)
             let img = imgElement?["src"]
             
+            // FIXME: book status 数据不对
             let statusXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[1]/dd"
             let statusElement = doc!.at_xpath(statusXpath)
             let status = statusElement?.text
@@ -186,6 +187,7 @@ public class CrawLib {
             let clickCount = Int(clickCountStr!)
             
             
+            // FIXME: 删除"介绍:    "字样
             let infoXpath = "//*[@id=\"waa\"]"
             let infoElement = doc!.at_xpath(infoXpath)
             let info = infoElement?.text
