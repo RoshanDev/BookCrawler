@@ -5,10 +5,9 @@
 ## Build generated
 build/
 DerivedData
-
-//buildlinux
-//.build_lin
-//.packages_lin
+buildlinux
+.build_lin
+.packages_lin
 
 ## Various settings
 *.pbxuser
