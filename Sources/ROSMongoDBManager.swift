@@ -169,7 +169,9 @@ class ROSMongoDBManager {
             book.author = bookJson["author"].string
             book.img = bookJson["img"].string
             book.href = bookJson["href"].string
+            book.status = bookJson["status"].int
             book.info = bookJson["info"].string
+            book.clickCount = bookJson["clickCount"].int
             book.chaptersHref = bookJson["chaptersHref"].string
             book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
             book.latestUpdateDate = bookJson["latestUpdateDate"].string
@@ -185,21 +187,24 @@ class ROSMongoDBManager {
         let bookBSON = BSON()
         
         /*
-         var name: String?
-         var author: String?
-         var img: String?
-         var href: String?
-         var info: String?
-         var chaptersHref: String?
-         var latestUpdateInfo: String?
-         var latestUpdateDate: String?
+         var name: String?               //书名
+         var author: String?             //作者
+         var img: String?                //封面图
+         var href: String?               //详情页链接
+         var status: Int?                //0 连载， 1 完本
+         var info: String?               //简介
+         var clickCount: Int?            //点击量。注意，前期直接将网站上数据覆盖到数据库。后期需要判断本地的是否小于当前值，小于才更新
+         var chaptersHref: String?       //章节列表页链接
+         var latestUpdateInfo: String?   //最近更新内容
+         var latestUpdateDate: String?   //最近更新时间
          */
         bookBSON.append(key: "name", string: book.name ?? "")
         bookBSON.append(key: "author", string: book.author ?? "")
         bookBSON.append(key: "img", string: book.img ?? "")
         bookBSON.append(key: "href", string: book.href ?? "")
-        bookBSON.append(key: "author", string: book.author ?? "")
+        bookBSON.append(key: "status", int: book.status ?? 0)
         bookBSON.append(key: "info", string: book.info ?? "")
+        bookBSON.append(key: "clickCount", int: book.clickCount ?? 0)
         bookBSON.append(key: "chaptersHref", string: book.chaptersHref ?? "")
         bookBSON.append(key: "latestUpdateInfo", string: book.latestUpdateInfo ?? "")
         bookBSON.append(key: "latestUpdateDate", string: book.latestUpdateDate ?? "")
