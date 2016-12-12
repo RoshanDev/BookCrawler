@@ -1,9 +1,0 @@
-version: "Swift version 3.0.1 (swift-3.0.1-RELEASE)"
-options: "7d6eb4bcc0ea8d7920a2301cfbc3e8b6"
-build_time: [534754595, 436885000]
-inputs:
-  "/perfectbuild/Packages/Kanna-2.1.1/Sources/Kanna/CSS.swift": [9223372036854775807, 0]
-  "/perfectbuild/Packages/Kanna-2.1.1/Sources/Kanna/Kanna.swift": [9223372036854775807, 0]
-  "/perfectbuild/Packages/Kanna-2.1.1/Sources/Kanna/libxmlHTMLDocument.swift": [9223372036854775807, 0]
-  "/perfectbuild/Packages/Kanna-2.1.1/Sources/Kanna/libxmlHTMLNode.swift": [9223372036854775807, 0]
-  "/perfectbuild/Packages/Kanna-2.1.1/Sources/Kanna/libxmlParserOption.swift": [9223372036854775807, 0]
