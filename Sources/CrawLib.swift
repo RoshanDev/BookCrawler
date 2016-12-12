@@ -15,7 +15,7 @@ import SwiftyJSON
 
 public class CrawLib {
     static let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
-
+    
     //点击列表页路由事件
     static func crawSumClickList() -> Dictionary<String, Any> {
         
@@ -102,7 +102,6 @@ public class CrawLib {
                 var author = authorElement?.text;
                 author = author?.replacingOccurrences(of: "作者：", with: "")
                 let book: Book = Book(name: titleElement?.text, author: author, img: imgElement?["src"], href: href)
-//                book.description()
                 books.append(book)
             }
             
@@ -239,7 +238,7 @@ public class CrawLib {
                 }
             }
             
-            ROSMongoDBManager.manager.insertBookChapters(name: bookInfo.name!, chapters: chapters)
+            ROSMongoDBManager.manager.insertBookChapters(book: bookInfo, chapters: chapters)
 
         } catch {
             
@@ -312,6 +311,4 @@ public class CrawLib {
        let data = str.data(using: String.Encoding(rawValue: enc), allowLossyConversion: false)
        return (data as NSData?, enc)
     }
-
-    
 }

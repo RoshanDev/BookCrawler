@@ -12,10 +12,10 @@ public class Chapter {
     var name: String?
     var href: String?
     var wordCount: Int?
-    
     var content: String?
     var createTime: Int?
     var updateTime: Int?
+    
     init() {
         
     }

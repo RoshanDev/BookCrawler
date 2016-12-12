@@ -17,15 +17,18 @@ public class Book {
     var chaptersHref: String?
     var latestUpdateInfo: String?
     var latestUpdateDate: String?
+    
     init() {
         
     }
+    
     init(name: String?, author: String?, img: String?, href: String?) {
         self.name = name
         self.author = author
         self.img = img
         self.href = href
     }
+    
     public func description() {
         print("书名:《\(self.name ?? "null")》 作者:\(self.author ?? "null") 封面:\(self.img ?? "null") 链接:\(self.href ?? "null")")
     }

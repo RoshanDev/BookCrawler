@@ -8,12 +8,15 @@
 
 import Foundation
 import MongoDB
+import SwiftyJSON
 
 class ROSMongoDBManager {
     private(set) var client:MongoClient
     private(set) var db: MongoDatabase
+    //如果该集合不存在于mongodb中，但是后来使用了insert相关函数，会自动新建该集合，然后执行相关操作
     private(set) var bookinfoCollection: MongoCollection?
     private(set) var chapterCollection: MongoCollection?
+    private(set) var testCollection: MongoCollection?
     
     static let manager = ROSMongoDBManager()
     
@@ -22,6 +25,7 @@ class ROSMongoDBManager {
         self.db = client.getDatabase(name: "rosbookworm")
         self.bookinfoCollection = db.getCollection(name: "bookinfo")
         self.chapterCollection = db.getCollection(name: "bookchapter")
+        self.testCollection = db.getCollection(name: "testCollection")//self.getTestCollection()
     }
     
     deinit {
@@ -42,13 +46,43 @@ class ROSMongoDBManager {
         print(result ?? "insertBookinfoArray nil")
     }
     
+    func fetchBookFromMongoDB(book: Book) -> Book? {
+        let fnd = ROSMongoDBManager.manager.bookinfoCollection?.find(query: self.bookQueryBSON(book: book))
+        if let bookBson = fnd?.next() {
+            print(bookBson)
+            let bookfinded = self.converBSONToBook(bookBSON: bookBson)
+            return bookfinded
+        }
+        return nil
+//        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: book), sort: nil, update: nil, fields: nil, remove: false, upsert: false, new: false))!;
+//        switch result {
+//        case .replyDoc:
+//            
+//            let book = Book()
+//            return book
+//        default:
+//            return nil
+//
+//        }
+    }
+    
+    //更新书籍信息
+    func updateBookinfo(book: Book) -> Bool {
+        let queryBSON = self.bookQueryBSON(book: book)
+        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.update(selector: queryBSON, update: self.convertBookToBSON(book: book)))!
+        switch result {
+        case MongoResult.error:
+            return false
+        default:
+            return true
+        }
+    }
+    
     //插入或更新书籍信息
     func insertOrUpdateBookinfo(bookinfo: Book) -> Bool {
-        //此处默认小说标题是唯一字段。以后如果多站抓取的话需要加上站点信息。
-        let queryBSON = BSON()
-        queryBSON.append(key: "name", string: bookinfo.name ?? "")
         let updateBSON = self.convertBookToBSON(book: bookinfo)
-        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: queryBSON, sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
+        //如果该书籍在bookinfo集合中不存在，则插入该书籍
+        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: bookinfo), sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
         
         switch result {
         case MongoResult.error:
@@ -59,9 +93,8 @@ class ROSMongoDBManager {
     }
     
     //插入书籍章节列表信息
-    func insertBookChapters(name: String, chapters: Array<Chapter>) {
-        let removeBSON = BSON()
-        removeBSON.append(key: "name", string: name)
+    func insertBookChapters(book: Book, chapters: Array<Chapter>) {
+        let removeBSON = self.bookQueryBSON(book: book)
         let collection = ROSMongoDBManager.manager.chapterCollection
         let result: MongoResult = (collection?.remove(selector: removeBSON))!
         switch result {
@@ -81,9 +114,8 @@ class ROSMongoDBManager {
     
     //插入或更新章节详情信息
     func insertOrUpdateChapterInfo(chapter: Chapter) -> Bool {
-        let queryBSON = BSON()
-        queryBSON.append(key: "href", string: chapter.href ?? "")
-        queryBSON.append(key: "name", string: chapter.name ?? "")
+        
+        let queryBSON = self.chapterQueryBSON(chapter: chapter)
         let updateBSON = self.convertChapterToBSON(chapter: chapter)
         let result: MongoResult = (ROSMongoDBManager.manager.chapterCollection?.findAndModify(query: queryBSON, sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
         
@@ -96,10 +128,72 @@ class ROSMongoDBManager {
     }
 
     
-    //将book对象转换成BSON格式
+    /// 获取 Book 对象的 MongoDB 查询 BSON
+    ///
+    /// - Parameter book: Book 对象
+    /// - Returns: MongoDB 查询 BSON
+    func bookQueryBSON(book: Book) -> BSON {
+        //此处默认小说标题是唯一字段。以后如果多站抓取的话需要加上站点信息。
+        let queryBSON = BSON()
+        queryBSON.append(key: "name", string: book.name!)
+        if let author = book.author {
+            queryBSON.append(key: "author", string: author)
+        }
+        return queryBSON
+    }
+    
+    
+    /// 获取 Chapter 对象的 MongoDB 查询 BSON
+    ///
+    /// - Parameter chapter: Chapter 对象
+    /// - Returns: MongoDB 查询 BSON
+    func chapterQueryBSON(chapter: Chapter) -> BSON {
+        let queryBSON = BSON()
+        queryBSON.append(key: "name", string: chapter.name!)
+        queryBSON.append(key: "href", string: chapter.href!)
+        return queryBSON
+    }
+    
+    
+    /// 将 BSON 数组转换成 Book 对象
+    ///
+    /// - Parameter bookBSON: mongodb 返回的 BSON 数据
+    /// - Returns: Book 对象
+    func converBSONToBook(bookBSON: BSON) -> Book {
+        let book = Book()
+        
+        if let dataFromString = bookBSON.asString.data(using: .utf8, allowLossyConversion: false) {
+            let bookJson = JSON(data: dataFromString)
+            
+            book.name = bookJson["name"].string
+            book.author = bookJson["author"].string
+            book.img = bookJson["img"].string
+            book.href = bookJson["href"].string
+            book.info = bookJson["info"].string
+            book.chaptersHref = bookJson["chaptersHref"].string
+            book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
+            book.latestUpdateDate = bookJson["latestUpdateDate"].string
+        }
+        return book
+    }
+    
+    /// 将 Book 对象转换成 BSON 数据
+    ///
+    /// - Parameter book: Book 对象
+    /// - Returns: BSON 数据
     func convertBookToBSON(book: Book) -> BSON {
         let bookBSON = BSON()
         
+        /*
+         var name: String?
+         var author: String?
+         var img: String?
+         var href: String?
+         var info: String?
+         var chaptersHref: String?
+         var latestUpdateInfo: String?
+         var latestUpdateDate: String?
+         */
         bookBSON.append(key: "name", string: book.name ?? "")
         bookBSON.append(key: "author", string: book.author ?? "")
         bookBSON.append(key: "img", string: book.img ?? "")
@@ -112,10 +206,22 @@ class ROSMongoDBManager {
         return bookBSON
     }
     
-    //将chapter对象转换成BSON格式
+    /// 将 Chapter 对象转换成 BSON 数据
+    ///
+    /// - Parameter chapter: Chapter 对象
+    /// - Returns: BSON 数据
     func convertChapterToBSON(chapter: Chapter) -> BSON {
         let chapterBSON = BSON()
-        
+        /*
+         var name: String?
+         var href: String?
+         var wordCount: Int?
+         
+         var content: String?
+         var createTime: Int?
+         var updateTime: Int?
+
+         */
         chapterBSON.append(key: "name", string: chapter.name ?? "")
         chapterBSON.append(key: "href", string: chapter.href ?? "")
         chapterBSON.append(key: "wordCount", int: chapter.wordCount ?? 0)

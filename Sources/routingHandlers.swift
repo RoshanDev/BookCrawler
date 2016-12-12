@@ -15,6 +15,10 @@ import MongoDB
 func addURLRoutes() {
     routes.add(uri: "/test", handler: testHandler)
     routes.add(uri: "/mongo", handler: mongoHandler)
+    
+    routes.add(uri: "/mongoInsert", handler: mongoInsertHandler)
+    routes.add(uri: "/mongoUpdate", handler: mongoUpdateHandler)
+    routes.add(uri: "/mongoInsertOrUpdate", handler: mongoInsertOrUpdateHandler)
 }
 
 // 将所有路由都注册到服务器上。
@@ -28,25 +32,57 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
     response.completed()
 }
 
+
+func mongoInsertHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    let collection = ROSMongoDBManager.manager.testCollection!
+    let bson = BSON()
+    bson.append(key: "name", string: "Roshan")
+    bson.append(key: "age", int: 25)
+    _ = collection.insert(document: bson)
+    response.appendBody(string: "123")
+    response.completed()
+}
+
+
+func mongoUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    let collection = ROSMongoDBManager.manager.testCollection!
+    let bson = BSON()
+    bson.append(key: "name", string: "Roshan")
+    
+    let mutBson = BSON()
+    mutBson.append(key: "name", string: "Roshan")
+    mutBson.append(key: "age", int: 26)
+    
+    let result:MongoResult = collection.update(selector: bson, update: mutBson)
+    print("mongoUpdate\(result)")
+
+    response.appendBody(string: "234")
+    response.completed()
+}
+
+func mongoInsertOrUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    let collection = ROSMongoDBManager.manager.testCollection!
+    let bson = BSON()
+    bson.append(key: "name", string: "Roshan")
+//    bson.append(key: "age", string: "57")
+
+    let mutBson = BSON()
+    mutBson.append(key: "name", string: "Roshan")
+    mutBson.append(key: "age", int: 25)
+    
+    let result:MongoResult = collection.findAndModify(query: bson, sort: nil, update: mutBson, fields: nil, remove: false, upsert: false, new: false)
+    //没有查到的时候 mongoInsertOrUpdatereplyDoc({ "lastErrorObject" : { "updatedExisting" : false, "n" : 0 }, "value" : null, "ok" : 1 })
+    //查到的时候 mongoInsertOrUpdatereplyDoc({ "lastErrorObject" : { "updatedExisting" : true, "n" : 1 }, "value" : { "_id" : { "$oid" : "584e8aa4c990d82af6690771" }, "name" : "Roshan", "age" : 30 }, "ok" : 1 })
+
+    print("mongoInsertOrUpdate\(result)")
+    
+    response.appendBody(string: "345")
+    response.completed()
+}
+
 func mongoHandler(request: HTTPRequest, _ response: HTTPResponse) {
     
-    // 创建连接
-    let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
-    
-    // 连接到具体的数据库，假设有个数据库名字叫 test
-    let db = client.getDatabase(name: "rosbookworm")
-    
-    // 定义集合
-    guard let collection = db.getCollection(name: "bookinfo") else {
-        return
-    }
-    
-    // 在关闭连接时注意关闭顺序与启动顺序相反
-    defer {
-        collection.close()
-        db.close()
-        client.close()
-    }
+    let collection = ROSMongoDBManager.manager.testCollection!
     
     // 执行查询
     let fnd = collection.find(query: BSON())
