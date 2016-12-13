@@ -8,7 +8,8 @@
 
 import Foundation
 import MongoDB
-import SwiftyJSON
+//import SwiftyJSON
+import Genome
 
 class ROSMongoDBManager {
     private(set) var client:MongoClient
@@ -160,22 +161,26 @@ class ROSMongoDBManager {
     /// - Parameter bookBSON: mongodb 返回的 BSON 数据
     /// - Returns: Book 对象
     func converBSONToBook(bookBSON: BSON) -> Book {
-        let book = Book()
+        var book = Book()
         
-        if let dataFromString = bookBSON.asString.data(using: .utf8, allowLossyConversion: false) {
-            let bookJson = JSON(data: dataFromString)
-            
-            book.name = bookJson["name"].string
-            book.author = bookJson["author"].string
-            book.img = bookJson["img"].string
-            book.href = bookJson["href"].string
-            book.status = bookJson["status"].int
-            book.info = bookJson["info"].string
-            book.clickCount = bookJson["clickCount"].int
-            book.chaptersHref = bookJson["chaptersHref"].string
-            book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
-            book.latestUpdateDate = bookJson["latestUpdateDate"].int
-        }
+        book = try! Book(node: bookBSON.asString)
+//        if let dataFromString = bookBSON.asString.data(using: .utf8, allowLossyConversion: false) {
+//        
+//            let bookJson = JSON(data: dataFromString)
+//            
+//            book.name = bookJson["name"].string
+//            book.author = bookJson["author"].string
+//            book.img = bookJson["img"].string
+//            book.href = bookJson["href"].string
+//            book.status = bookJson["status"].int
+//            book.info = bookJson["info"].string
+//            book.clickCount = bookJson["clickCount"].int
+//            book.chaptersHref = bookJson["chaptersHref"].string
+//            book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
+//            book.latestUpdateDate = bookJson["latestUpdateDate"].int
+//        
+//            let book = try Book(node: dataFromString)
+//        }
         return book
     }
     

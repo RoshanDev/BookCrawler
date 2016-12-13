@@ -11,7 +11,9 @@ import PerfectHTTP
 import Foundation
 import Kanna
 import MongoDB
-import SwiftyJSON
+import CoreFoundation
+
+//import SwiftyJSON
 
 public class CrawLib {
 //    static let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
@@ -36,9 +38,10 @@ public class CrawLib {
         }
         
         do {
-            let cfEnc = CFStringEncodings.GB_18030_2000
-            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-            
+//            let cfEnc = CFStringEncodings.GB_18030_2000
+//            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+            let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+
             let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
             //let htmlDic =
             let books = CrawLib.crawClickList(html: myHTMLString)
@@ -123,8 +126,9 @@ public class CrawLib {
     //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据 
     static func crawBookInfo(href: String) {
         
-        let cfEnc = CFStringEncodings.GB_18030_2000
-        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+//        let cfEnc = CFStringEncodings.GB_18030_2000
+//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+        let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
         
         guard let crawUrl = URL(string: href) else {
             let message = "Error: \(href) doesn't seem to be a valid URL"
@@ -193,6 +197,8 @@ public class CrawLib {
             
             let book: Book = Book(name: title!, author: author!, img: img, href: href, status: statusCode, info: info, clickCount: clickCount!, chaptersHref: chaptersHref, latestUpdateInfo: latestUpdateInfo, latestUpdateDate: latestUpdateStamp)
             
+            let bookJson = try? book.makeNode()
+
             let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
             
             if result {
@@ -229,22 +235,23 @@ public class CrawLib {
     }
 
     //爬取书籍目录信息
-    static func crawBookChaptersInfo(book: Book) {
+    static func crawBookChaptersInfo(book: Book) -> [Chapter] {
         
         guard let crawUrl = URL(string: book.chaptersHref!) else {
             let message = "Error: \(book.chaptersHref!) doesn't seem to be a valid URL"
             print(message)
-            return
+            return []
         }
         
-        let cfEnc = CFStringEncodings.GB_18030_2000
-        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-        
+//        let cfEnc = CFStringEncodings.GB_18030_2000
+//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+        let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+
         do {
             let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
             let doc = HTML(html: html, encoding: .utf8)
             if doc == nil {
-                return
+                return []
             }
             
             //先取出卷信息
@@ -268,13 +275,15 @@ public class CrawLib {
                     
                     chapters.append(chapter)
                 }
+                return chapters
             }
             
-            ROSMongoDBManager.manager.insertBookChapters(book: book, chapters: chapters)
+//            ROSMongoDBManager.manager.insertBookChapters(book: book, chapters: chapters)
 
         } catch {
-            
+            return []
         }
+        return []
     }
     
     //爬取章节详情信息
@@ -287,9 +296,10 @@ public class CrawLib {
             return
         }
         
-        let cfEnc = CFStringEncodings.GB_18030_2000
-        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-        
+//        let cfEnc = CFStringEncodings.GB_18030_2000
+//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+        let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+
         do {
             let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
             let doc = HTML(html: html, encoding: .utf8)
@@ -372,9 +382,10 @@ public class CrawLib {
         return Int(timeInterval)
     }
     
-    func UTF8ToGB2312(str: String) -> (NSData?, UInt) {
-       let enc = CFStringConvertEncodingToNSStringEncoding(UInt32(CFStringEncodings.GB_18030_2000.rawValue))
-       let data = str.data(using: String.Encoding(rawValue: enc), allowLossyConversion: false)
-       return (data as NSData?, enc)
-    }
+//    func UTF8ToGB2312(str: String) -> (NSData?, UInt) {
+//       let enc = CFStringConvertEncodingToNSStringEncoding(UInt32(CFStringEncodings.GB_18030_2000.rawValue))
+//       let data = str.data(using: String.Encoding(rawValue: enc), allowLossyConversion: false)
+//       return (data as NSData?, enc)
+//    }
+    
 }
