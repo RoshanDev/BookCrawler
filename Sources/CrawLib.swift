@@ -14,12 +14,21 @@ import MongoDB
 import SwiftyJSON
 
 public class CrawLib {
-    static let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
+//    static let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
+    
+    static func startCrawBookInfo() {
+//        let lastListIndex = 1
+//        let lastBookIndex = 0
+//        let startListIndex = 1
+        
+        
+        
+    }
     
     //点击列表页路由事件
-    static func crawSumClickList() -> Dictionary<String, Any> {
+    static func crawSumClickList(listIndex: Int = 1) -> Dictionary<String, Any> {
         
-        let crawUri = "http://www.quanshu.net/all/allvisit_1_0_0_0_0_0_1.html"
+        let crawUri = "http://www.quanshu.net/all/allvisit_0_0_0_0_0_0_" + String(listIndex) + ".html"
         guard let crawUrl = URL(string: crawUri) else {
             let message = "Error: \(crawUri) doesn't seem to be a valid URL"
             return CrawLib.showResponse(code: 0, message: message, data: nil)
@@ -31,10 +40,24 @@ public class CrawLib {
             
             let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
             //let htmlDic =
-            _ = CrawLib.crawClickList(html: myHTMLString)
-            return ["1":1, "2":2]
+            let books = CrawLib.crawClickList(html: myHTMLString)
+            
+            // TODO: 开启多线程，现在太慢了
+            for book in books {
+                CrawLib.crawBookInfo(href: book.href!)
+            }
+            
+            // TODO: 需要存储下来已更新的页面index
+            print("第\(listIndex)页数据抓取完毕")
+            if listIndex > 2541 {
+                return ["completed":1]
+            }else {
+                _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
+                return ["completed":0]
+            }
         } catch let error {
             print("Error: \(error)")
+            // TODO: 需要存储下来已更新的页面index，并写入失败队列
             return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
         }
     }
@@ -53,10 +76,12 @@ public class CrawLib {
             let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
             
             let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-            CrawLib.crawBookInfo(href: crawUri, html: myHTMLString)
+//            CrawLib.crawBookInfo(href: crawUri, html: myHTMLString)
             return ["1":1, "2":2]
         } catch let error {
+            // FIXME: 需要存到失败队列中
             print("Error: \(error)")
+            
             return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
         }
     }
@@ -83,7 +108,7 @@ public class CrawLib {
     }
     
     
-    static func crawClickList(html: String)-> Dictionary<String, Any> {
+    static func crawClickList(html: String)-> [Book] {
         if let doc = HTML(html: html, encoding: .utf8) {
             let listElement = doc.at_xpath("//*[@id=\"wrapper\"]/div[3]/div/div/div/div[2]/div[2]/div")
             
@@ -101,99 +126,121 @@ public class CrawLib {
                 let imgElement = aElement?.at_xpath("img[@alt]")
                 var author = authorElement?.text;
                 author = author?.replacingOccurrences(of: "作者：", with: "")
-                let book: Book = Book(name: titleElement?.text, author: author, img: imgElement?["src"], href: href)
+                let book: Book = Book(name: (titleElement?.text)!, author: author!, img: imgElement?["src"], href: href!)
                 books.append(book)
             }
-            
-            ROSMongoDBManager.manager.insertBookinfoArray(bookinfos: books)
-            let title = doc.title
-            let head = doc.head?.innerHTML
-            let body = doc.body?.innerHTML
-            
-            let dic = ["title":title, "head":head, "body":body]
-            return dic;
+//            ROSMongoDBManager.manager.insertBookinfoArray(bookinfos: books)
+            return books
         }
-        return ["htmlParse":"failed"]
+        return [Book]()
     }
     
-    //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据
-    static func crawBookInfo(href: String, html: String) {
+    //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据 
+    static func crawBookInfo(href: String) {
         
-        let doc = HTML(html: html, encoding: .utf8)
-        if doc == nil {
+        let cfEnc = CFStringEncodings.GB_18030_2000
+        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+        
+        guard let crawUrl = URL(string: href) else {
+            let message = "Error: \(href) doesn't seem to be a valid URL"
+            print(message)
             return
         }
         
-        let titleXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/h1"
-        
-        let titleElement = doc!.at_xpath(titleXpath)
-        let title = titleElement?.text
-        
-        if title == nil {
-            return
+        do {
+            let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
+            
+            let doc = HTML(html: myHTMLString, encoding: .utf8)
+            if doc == nil {
+                return
+            }
+            
+            let titleXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/h1"
+            
+            let titleElement = doc!.at_xpath(titleXpath)
+            let title = titleElement?.text
+            
+            if title == nil {
+                return
+            }
+            
+            let authorXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[3]/dd/a"
+            let authorElement = doc!.at_xpath(authorXpath)
+            let author = authorElement?.text
+            
+            let imgXpath = "//*[@id=\"container\"]/div[2]/section/div/a/img"
+            let imgElement = doc!.at_xpath(imgXpath)
+            let img = imgElement?["src"]
+            
+            // FIXME: book status 数据不对
+            let statusXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[1]/dd"
+            let statusElement = doc!.at_xpath(statusXpath)
+            let status = statusElement?.text
+            var statusCode = 0
+            if status! == "完本" {
+                statusCode = 1
+            }
+            
+            let clickCountXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[2]/dd"
+            let clickCountElement = doc!.at_xpath(clickCountXpath)
+            let clickCountStr = clickCountElement?.text
+            let clickCount = Int(clickCountStr!)
+            
+            
+            // FIXME: 删除"介绍:    "字样
+            let infoXpath = "//*[@id=\"waa\"]"
+            let infoElement = doc!.at_xpath(infoXpath)
+            let info = infoElement?.text
+            
+            let chaptersHrefXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/div[2]/a[1]"
+            let chaptersHrefElement = doc!.at_xpath(chaptersHrefXpath)
+            let chaptersHref = chaptersHrefElement?["href"]
+            
+            let latestUpdateXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[5]/dd/ul/li[1]"
+            let latestUpdateElement = doc!.at_xpath(latestUpdateXpath)
+            let latestUpdateInfo = latestUpdateElement?.at_xpath("a")?.text
+            
+            
+            var latestUpdateDate = latestUpdateElement?.text
+            if latestUpdateInfo != nil {
+                latestUpdateDate = latestUpdateDate?.replacingOccurrences(of: latestUpdateInfo!, with: "")
+            }
+            
+            let book: Book = Book(name: title!, author: author!, img: img, href: href, status: statusCode, info: info, clickCount: clickCount!, chaptersHref: chaptersHref, latestUpdateInfo: latestUpdateInfo, latestUpdateDate: latestUpdateDate)
+            
+            let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
+            
+            if result {
+                print("更新书籍《\(title!)》数据成功")
+            }else {
+                print("更新书籍《\(title!)》数据失败")
+            }
+            
+            /*
+             //是否需要这样先判断是否有info字段，没有再更新？
+             guard let collection: MongoCollection = ROSMongoDBManager.manager.bookinfoCollection else {
+             return
+             }
+             let queryBson = BSON()
+             queryBson.append(key: "name", string: title!)
+             let fnd = collection.find(query: queryBson)
+             
+             if let bookEle = fnd?.next() {
+             print(bookEle)
+             let bookStr = bookEle.asString
+             if let dataFromString = bookStr.data(using: .utf8, allowLossyConversion: false) {
+             let bookJson = JSON(data: dataFromString)
+             
+             let latestUpdate = bookJson["latestUpdate"]
+             if latestUpdate == nil {
+             //此处更新
+             }
+             }
+             }*/
+        } catch let error{
+            print("获取链接\(href)的书籍详情数据失败")
+            print("Error: \(error)")
         }
-        
-        let authorXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[3]/dd/a"
-        let authorElement = doc!.at_xpath(authorXpath)
-        let author = authorElement?.text
-        
-        let imgXpath = "//*[@id=\"container\"]/div[2]/section/div/a/img"
-        let imgElement = doc!.at_xpath(imgXpath)
-        let img = imgElement?["src"]
-        
-        let infoXpath = "//*[@id=\"waa\"]"
-        let infoElement = doc!.at_xpath(infoXpath)
-        let info = infoElement?.text
-        
-        let chaptersHrefXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/div[2]/a[1]"
-        let chaptersHrefElement = doc!.at_xpath(chaptersHrefXpath)
-        let chaptersHref = chaptersHrefElement?["href"]
-        
-        let latestUpdateXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[5]/dd/ul/li[1]"
-        let latestUpdateElement = doc!.at_xpath(latestUpdateXpath)
-        
-        let latestUpdateInfo = latestUpdateElement?.at_xpath("a")?.text
-        
-        
-        var latestUpdateDate = latestUpdateElement?.text
-        if latestUpdateInfo != nil {
-            latestUpdateDate = latestUpdateDate?.replacingOccurrences(of: latestUpdateInfo!, with: "")
-        }
-        let book: Book = Book(name: title, author: author, img: img, href: href)
-        book.info = info
-        book.chaptersHref = chaptersHref
-        book.latestUpdateInfo = latestUpdateInfo
-        book.latestUpdateDate = latestUpdateDate
-        
-        let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
-        
-        if result {
-            print("更新书籍《\(title!)》数据成功")
-        }else {
-            print("更新书籍《\(title!)》数据失败")
-        }
-        
-        /*
-         //是否需要这样先判断是否有info字段，没有再更新？
-         guard let collection: MongoCollection = ROSMongoDBManager.manager.bookinfoCollection else {
-         return
-         }
-         let queryBson = BSON()
-         queryBson.append(key: "name", string: title!)
-         let fnd = collection.find(query: queryBson)
-         
-         if let bookEle = fnd?.next() {
-         print(bookEle)
-         let bookStr = bookEle.asString
-         if let dataFromString = bookStr.data(using: .utf8, allowLossyConversion: false) {
-         let bookJson = JSON(data: dataFromString)
-         
-         let latestUpdate = bookJson["latestUpdate"]
-         if latestUpdate == nil {
-         //此处更新
-         }
-         }
-         }*/
     }
 
     //爬取书籍目录信息
