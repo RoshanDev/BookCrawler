@@ -18,13 +18,13 @@ public class Book {
     var clickCount: Int?            //点击量。注意，前期直接将网站上数据覆盖到数据库。后期需要判断本地的是否小于当前值，小于才更新
     var chaptersHref: String?       //章节列表页链接
     var latestUpdateInfo: String?   //最近更新内容
-    var latestUpdateDate: String?   //最近更新时间
+    var latestUpdateDate: Int?   //最近更新时间
     
     init() {
         
     }
     
-    init(name: String, author: String, img: String? = nil, href: String = "", status: Int? = 0, info: String? = nil, clickCount: Int? = 0, chaptersHref: String? = nil, latestUpdateInfo: String? = nil, latestUpdateDate: String? = nil) {
+    init(name: String, author: String, img: String? = nil, href: String = "", status: Int? = 0, info: String? = nil, clickCount: Int? = 0, chaptersHref: String? = nil, latestUpdateInfo: String? = nil, latestUpdateDate: Int? = 0) {
         self.name = name
         self.author = author
         self.img = img

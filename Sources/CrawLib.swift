@@ -16,6 +16,7 @@ import SwiftyJSON
 public class CrawLib {
 //    static let client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
     
+    
     static func startCrawBookInfo() {
 //        let lastListIndex = 1
 //        let lastBookIndex = 0
@@ -64,26 +65,9 @@ public class CrawLib {
     
     //详情页路由事件
     static func detailInfo() -> Dictionary<String, Any> {
-        
         let crawUri = "http://www.quanshu.net/book_13720.html"
-        guard let crawUrl = URL(string: crawUri) else {
-            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
-            return CrawLib.showResponse(code: 0, message: message, data: nil)
-        }
-        
-        do {
-            let cfEnc = CFStringEncodings.GB_18030_2000
-            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-            
-            let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-//            CrawLib.crawBookInfo(href: crawUri, html: myHTMLString)
-            return ["1":1, "2":2]
-        } catch let error {
-            // FIXME: 需要存到失败队列中
-            print("Error: \(error)")
-            
-            return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
-        }
+        CrawLib.crawBookInfo(href: crawUri)
+        return ["1":1, "2":2]
     }
 
     //章节列表页路由事件
@@ -91,7 +75,7 @@ public class CrawLib {
         let book = Book(name: "绝世唐门", author: "唐家三少", img: "http://img.quanshu.net/image/13/13720/13720s.jpg", href: "http://www.quanshu.net/book_13720.html")
         book.chaptersHref = "http://www.quanshu.net/book/13/13720/"
 
-        CrawLib.crawBookChaptersInfo(bookInfo: book)
+        CrawLib.crawBookChaptersInfo(book: book)
         return ["1":1, "2":2]
 
     }
@@ -107,6 +91,7 @@ public class CrawLib {
         return ["1":1, "2":2]
     }
     
+    // MARK: 抓取、保存网页内容相关函数
     
     static func crawClickList(html: String)-> [Book] {
         if let doc = HTML(html: html, encoding: .utf8) {
@@ -172,12 +157,11 @@ public class CrawLib {
             let imgElement = doc!.at_xpath(imgXpath)
             let img = imgElement?["src"]
             
-            // FIXME: book status 数据不对
             let statusXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[1]/dd"
             let statusElement = doc!.at_xpath(statusXpath)
             let status = statusElement?.text
             var statusCode = 0
-            if status! == "完本" {
+            if status! == "全本" {
                 statusCode = 1
             }
             
@@ -186,11 +170,9 @@ public class CrawLib {
             let clickCountStr = clickCountElement?.text
             let clickCount = Int(clickCountStr!)
             
-            
-            // FIXME: 删除"介绍:    "字样
             let infoXpath = "//*[@id=\"waa\"]"
             let infoElement = doc!.at_xpath(infoXpath)
-            let info = infoElement?.text
+            let info = infoElement?.text?.replacingOccurrences(of: "介绍:    ", with: "")
             
             let chaptersHrefXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/div[2]/a[1]"
             let chaptersHrefElement = doc!.at_xpath(chaptersHrefXpath)
@@ -200,13 +182,16 @@ public class CrawLib {
             let latestUpdateElement = doc!.at_xpath(latestUpdateXpath)
             let latestUpdateInfo = latestUpdateElement?.at_xpath("a")?.text
             
-            
             var latestUpdateDate = latestUpdateElement?.text
             if latestUpdateInfo != nil {
                 latestUpdateDate = latestUpdateDate?.replacingOccurrences(of: latestUpdateInfo!, with: "")
             }
+            latestUpdateDate = latestUpdateDate?.replacingOccurrences(of: " [", with: "").replacingOccurrences(of: "]", with: "")
+            let latestUpdateStamp = CrawLib.stringToTimeStamp(stringTime: latestUpdateDate!)
+//            let tempV = CrawLib.timeStampToString(timeStamp: latestUpdateStamp)
+//            print("first \(latestUpdateDate) second \(latestUpdateStamp) third \(tempV)")
             
-            let book: Book = Book(name: title!, author: author!, img: img, href: href, status: statusCode, info: info, clickCount: clickCount!, chaptersHref: chaptersHref, latestUpdateInfo: latestUpdateInfo, latestUpdateDate: latestUpdateDate)
+            let book: Book = Book(name: title!, author: author!, img: img, href: href, status: statusCode, info: info, clickCount: clickCount!, chaptersHref: chaptersHref, latestUpdateInfo: latestUpdateInfo, latestUpdateDate: latestUpdateStamp)
             
             let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
             
@@ -244,10 +229,10 @@ public class CrawLib {
     }
 
     //爬取书籍目录信息
-    static func crawBookChaptersInfo(bookInfo: Book) {
+    static func crawBookChaptersInfo(book: Book) {
         
-        guard let crawUrl = URL(string: bookInfo.chaptersHref!) else {
-            let message = "Error: \(bookInfo.chaptersHref!) doesn't seem to be a valid URL"
+        guard let crawUrl = URL(string: book.chaptersHref!) else {
+            let message = "Error: \(book.chaptersHref!) doesn't seem to be a valid URL"
             print(message)
             return
         }
@@ -285,7 +270,7 @@ public class CrawLib {
                 }
             }
             
-            ROSMongoDBManager.manager.insertBookChapters(book: bookInfo, chapters: chapters)
+            ROSMongoDBManager.manager.insertBookChapters(book: book, chapters: chapters)
 
         } catch {
             
@@ -337,6 +322,8 @@ public class CrawLib {
         }
     }
     
+    // MARK: 相关工具函数
+    
     static func showResponse(code: Int, message: String, data: Dictionary<String, Any>?)-> Dictionary<String, Any>{
         var response: Dictionary<String, Any>
         
@@ -348,6 +335,38 @@ public class CrawLib {
         return response
     }
 
+    
+    /// 时间转化为时间戳
+    ///
+    /// - Parameter stringTime: 时间字符串，如 "2015-04-12 16:38"
+    /// - Returns: 时间戳
+    static func stringToTimeStamp(stringTime:String) -> Int {
+        let dfmatter = DateFormatter()
+        dfmatter.dateFormat="yyyy-MM-dd HH:mm"
+        let date = dfmatter.date(from: stringTime)
+        let dateStamp:TimeInterval = date!.timeIntervalSince1970
+        let resultDateStamp:Int = Int(dateStamp)
+        return resultDateStamp
+    }
+    
+    
+    /// 时间戳转时间
+    ///
+    /// - Parameter timeStamp: 时间戳
+    /// - Returns: 时间字符串
+    static func timeStampToString(timeStamp:Int) -> String {
+        let string = String(timeStamp)
+        let timeSta:TimeInterval = Double(string)!
+        let dfmatter = DateFormatter()
+        dfmatter.dateFormat="yyyy-MM-dd HH:mm"
+        let date = Date(timeIntervalSince1970: timeSta)
+        return dfmatter.string(from: date)
+    }
+    
+    
+    /// 获取当前时间的时间戳
+    ///
+    /// - Returns: 时间戳
     static func timeStamp() -> Int {
         let timeInterval:TimeInterval = Date().timeIntervalSince1970
         return Int(timeInterval)

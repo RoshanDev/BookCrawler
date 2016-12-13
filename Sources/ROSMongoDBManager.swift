@@ -174,7 +174,7 @@ class ROSMongoDBManager {
             book.clickCount = bookJson["clickCount"].int
             book.chaptersHref = bookJson["chaptersHref"].string
             book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
-            book.latestUpdateDate = bookJson["latestUpdateDate"].string
+            book.latestUpdateDate = bookJson["latestUpdateDate"].int
         }
         return book
     }
@@ -207,7 +207,7 @@ class ROSMongoDBManager {
         bookBSON.append(key: "clickCount", int: book.clickCount ?? 0)
         bookBSON.append(key: "chaptersHref", string: book.chaptersHref ?? "")
         bookBSON.append(key: "latestUpdateInfo", string: book.latestUpdateInfo ?? "")
-        bookBSON.append(key: "latestUpdateDate", string: book.latestUpdateDate ?? "")
+        bookBSON.append(key: "latestUpdateDate", int: book.latestUpdateDate ?? 0)
         return bookBSON
     }
     
