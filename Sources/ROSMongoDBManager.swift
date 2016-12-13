@@ -9,7 +9,7 @@
 import Foundation
 import MongoDB
 //import SwiftyJSON
-import Genome
+//import Genome
 
 class ROSMongoDBManager {
     private(set) var client:MongoClient
@@ -82,6 +82,7 @@ class ROSMongoDBManager {
     //插入或更新书籍信息
     func insertOrUpdateBookinfo(bookinfo: Book) -> Bool {
         let updateBSON = self.convertBookToBSON(book: bookinfo)
+//        let book = self.converBSONToBook(bookBSON: updateBSON)
         //如果该书籍在bookinfo集合中不存在，则插入该书籍
         let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: bookinfo), sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
         
@@ -161,26 +162,22 @@ class ROSMongoDBManager {
     /// - Parameter bookBSON: mongodb 返回的 BSON 数据
     /// - Returns: Book 对象
     func converBSONToBook(bookBSON: BSON) -> Book {
-        var book = Book()
+        let book = Book()
         
-        book = try! Book(node: bookBSON.asString)
-//        if let dataFromString = bookBSON.asString.data(using: .utf8, allowLossyConversion: false) {
-//        
-//            let bookJson = JSON(data: dataFromString)
-//            
-//            book.name = bookJson["name"].string
-//            book.author = bookJson["author"].string
-//            book.img = bookJson["img"].string
-//            book.href = bookJson["href"].string
-//            book.status = bookJson["status"].int
-//            book.info = bookJson["info"].string
-//            book.clickCount = bookJson["clickCount"].int
-//            book.chaptersHref = bookJson["chaptersHref"].string
-//            book.latestUpdateInfo = bookJson["latestUpdateInfo"].string
-//            book.latestUpdateDate = bookJson["latestUpdateDate"].int
-//        
-//            let book = try Book(node: dataFromString)
-//        }
+        if let dataFromString = bookBSON.asString.data(using: .utf8, allowLossyConversion: false) {
+        
+            let bookJson = try? JSONSerialization.jsonObject(with: dataFromString, options: JSONSerialization.ReadingOptions.mutableContainers) as! Dictionary<String, Any>
+            book.name = bookJson?["name"] as! String?
+            book.author = bookJson?["author"] as! String?
+            book.img = bookJson?["img"] as! String?
+            book.href = bookJson?["href"] as! String?
+            book.status = bookJson?["status"] as! Int?
+            book.info = bookJson?["info"] as! String?
+            book.clickCount = bookJson?["clickCount"] as! Int?
+            book.chaptersHref = bookJson?["chaptersHref"]  as! String?
+            book.latestUpdateInfo = bookJson?["latestUpdateInfo"] as! String?
+            book.latestUpdateDate = bookJson?["latestUpdateDate"] as! Int?
+        }
         return book
     }
     

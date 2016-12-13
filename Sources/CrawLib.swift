@@ -197,8 +197,6 @@ public class CrawLib {
             
             let book: Book = Book(name: title!, author: author!, img: img, href: href, status: statusCode, info: info, clickCount: clickCount!, chaptersHref: chaptersHref, latestUpdateInfo: latestUpdateInfo, latestUpdateDate: latestUpdateStamp)
             
-            let bookJson = try? book.makeNode()
-
             let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
             
             if result {

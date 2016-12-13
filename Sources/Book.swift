@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Genome
+//import Genome
 
-public class Book: MappableObject{
+public class Book {
     var name: String?               //书名
     var author: String?             //作者
     var img: String?                //封面图
@@ -25,18 +25,18 @@ public class Book: MappableObject{
         
     }
     
-    required public init(map: Map) throws {
-        name = try map.extract("name")
-        author = try map.extract("author")
-        img = try map.extract("img")
-        href = try map.extract("href")
-        status = try map.extract("status")
-        info = try map.extract("info")
-        clickCount = try map.extract("clickCount")
-        chaptersHref = try map.extract("chaptersHref")
-        latestUpdateInfo = try map.extract("latestUpdateInfo")
-        latestUpdateDate = try map.extract("latestUpdateDate")
-    }
+//    required public init(map: Map) throws {
+//        name = try map.extract("name")
+//        author = try map.extract("author")
+//        img = try map.extract("img")
+//        href = try map.extract("href")
+//        status = try map.extract("status")
+//        info = try map.extract("info")
+//        clickCount = try map.extract("clickCount")
+//        chaptersHref = try map.extract("chaptersHref")
+//        latestUpdateInfo = try map.extract("latestUpdateInfo")
+//        latestUpdateDate = try map.extract("latestUpdateDate")
+//    }
 
     
     init(name: String, author: String, img: String? = nil, href: String = "", status: Int? = 0, info: String? = nil, clickCount: Int? = 0, chaptersHref: String? = nil, latestUpdateInfo: String? = nil, latestUpdateDate: Int? = 0) {
