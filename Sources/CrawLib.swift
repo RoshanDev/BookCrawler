@@ -28,7 +28,7 @@ public class CrawLib {
         do {
             let cfEnc = CFStringEncodings.GB_18030_2000
             let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
-
+            
             let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
             //let htmlDic =
             _ = CrawLib.crawClickList(html: myHTMLString)
