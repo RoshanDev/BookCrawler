@@ -66,6 +66,6 @@ fastlane/report.xml
 fastlane/screenshots
 
 Packages/
-PerfectTemplate.xcodeproj
+//BookCrawler.xcodeproj
 Tests/
 webroot/
