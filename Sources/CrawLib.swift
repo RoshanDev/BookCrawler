@@ -37,6 +37,7 @@ public class CrawLib {
             return CrawLib.showResponse(code: 0, message: message, data: nil)
         }
         
+        var errorIndexs = [Int]()
         do {
 //            let cfEnc = CFStringEncodings.GB_18030_2000
 //            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
@@ -53,16 +54,48 @@ public class CrawLib {
             
             // TODO: 需要存储下来已更新的页面index
             print("第\(listIndex)页数据抓取完毕")
-            if listIndex > 2541 {
-                return ["completed":1]
-            }else {
-                _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
-                return ["completed":0]
-            }
         } catch let error {
             print("Error: \(error)")
+            print("第\(listIndex)页数据抓取失败")
+            errorIndexs.append(listIndex)
             // TODO: 需要存储下来已更新的页面index，并写入失败队列
             return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
+        }
+        
+        if listIndex > 2541 {
+            if errorIndexs.count > 0 {
+                CrawLib.crawErrorSumClickList(errorIndexs: errorIndexs)
+            }
+            return ["completed":1]
+        }else {
+            _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
+            return ["completed":0]
+        }
+    }
+    
+    //重新抓取之前失败的列表页数据
+    static func crawErrorSumClickList(errorIndexs: [Int]) {
+        for listIndex in errorIndexs {
+            let crawUri = "http://www.quanshu.net/all/allvisit_0_0_0_0_0_0_" + String(listIndex) + ".html"
+            guard let crawUrl = URL(string: crawUri) else {
+                let message = "Error: \(crawUri) doesn't seem to be a valid URL"
+                print(message)
+                return
+            }
+            
+            do {
+                let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+                let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
+                let books = CrawLib.crawClickList(html: myHTMLString)
+                
+                for book in books {
+                    CrawLib.crawBookInfo(href: book.href!)
+                }
+                print("第\(listIndex)页数据重新抓取完毕")
+            } catch let error {
+                print("Error: \(error)")
+                print("第\(listIndex)页数据重新抓取失败")
+            }
         }
     }
     
@@ -74,13 +107,11 @@ public class CrawLib {
     }
 
     //章节列表页路由事件
-    static func chaptersInfo() -> Dictionary<String, Any> {
+    static func chaptersInfo() {
         let book = Book(name: "绝世唐门", author: "唐家三少", img: "http://img.quanshu.net/image/13/13720/13720s.jpg", href: "http://www.quanshu.net/book_13720.html")
         book.chaptersHref = "http://www.quanshu.net/book/13/13720/"
 
         CrawLib.crawBookChaptersInfo(book: book)
-        return ["1":1, "2":2]
-
     }
     
     //章节详情页路由事件
@@ -124,16 +155,13 @@ public class CrawLib {
     }
     
     //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据 
-    static func crawBookInfo(href: String) {
-        
-//        let cfEnc = CFStringEncodings.GB_18030_2000
-//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+    static func crawBookInfo(href: String) -> Book? {
         let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
         
         guard let crawUrl = URL(string: href) else {
             let message = "Error: \(href) doesn't seem to be a valid URL"
             print(message)
-            return
+            return nil
         }
         
         do {
@@ -141,7 +169,7 @@ public class CrawLib {
             
             let doc = HTML(html: myHTMLString, encoding: .utf8)
             if doc == nil {
-                return
+                return nil
             }
             
             let titleXpath = "//*[@id=\"container\"]/div[2]/section/div/div[1]/h1"
@@ -150,7 +178,7 @@ public class CrawLib {
             let title = titleElement?.text
             
             if title == nil {
-                return
+                return nil
             }
             
             let authorXpath = "//*[@id=\"container\"]/div[2]/section/div/div[4]/div[1]/dl[3]/dd/a"
@@ -204,7 +232,7 @@ public class CrawLib {
             }else {
                 print("更新书籍《\(title!)》数据失败")
             }
-            
+            return book
             /*
              //是否需要这样先判断是否有info字段，没有再更新？
              guard let collection: MongoCollection = ROSMongoDBManager.manager.bookinfoCollection else {
@@ -229,6 +257,7 @@ public class CrawLib {
         } catch let error{
             print("获取链接\(href)的书籍详情数据失败")
             print("Error: \(error)")
+            return nil
         }
     }
 

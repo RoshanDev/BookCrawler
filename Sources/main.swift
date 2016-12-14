@@ -50,12 +50,10 @@ routes.add(method: .get, uri: "/detailInfo", handler: {
 routes.add(method: .get, uri: "/chaptersInfo", handler: {
         request, response in
         
-        let jsonDic = CrawLib.chaptersInfo()
-        
         response.setHeader(.contentType, value: "application/json")
         
         do {
-            try response.setBody(json: jsonDic)
+            try response.setBody(json: ["1":1])
         } catch  {
             print("setBody failed")
         }

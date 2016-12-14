@@ -7,9 +7,10 @@
 //
 
 import Foundation
-//import Genome
+import PerfectLib
 
-public class Book {
+public class Book: JSONConvertibleObject {
+    var id: String?                 //书籍在mongodb中的oid
     var name: String?               //书名
     var author: String?             //作者
     var img: String?                //封面图
@@ -21,25 +22,12 @@ public class Book {
     var latestUpdateInfo: String?   //最近更新内容
     var latestUpdateDate: Int?   //最近更新时间
     
-    init() {
+    override init() {
         
     }
     
-//    required public init(map: Map) throws {
-//        name = try map.extract("name")
-//        author = try map.extract("author")
-//        img = try map.extract("img")
-//        href = try map.extract("href")
-//        status = try map.extract("status")
-//        info = try map.extract("info")
-//        clickCount = try map.extract("clickCount")
-//        chaptersHref = try map.extract("chaptersHref")
-//        latestUpdateInfo = try map.extract("latestUpdateInfo")
-//        latestUpdateDate = try map.extract("latestUpdateDate")
-//    }
-
-    
-    init(name: String, author: String, img: String? = nil, href: String = "", status: Int? = 0, info: String? = nil, clickCount: Int? = 0, chaptersHref: String? = nil, latestUpdateInfo: String? = nil, latestUpdateDate: Int? = 0) {
+    init(id: String? = nil, name: String, author: String, img: String? = nil, href: String = "", status: Int? = 0, info: String? = nil, clickCount: Int? = 0, chaptersHref: String? = nil, latestUpdateInfo: String? = nil, latestUpdateDate: Int? = 0) {
+        self.id = id
         self.name = name
         self.author = author
         self.img = img
@@ -52,7 +40,39 @@ public class Book {
         self.latestUpdateDate = latestUpdateDate
     }
     
+    override public func setJSONValues(_ values: [String : Any]) {
+        self.id                 = getJSONValue(named: "id", from: values, defaultValue: "")
+        self.name               = getJSONValue(named: "name", from: values, defaultValue: "")
+        self.author             = getJSONValue(named: "author", from: values, defaultValue: "")
+        self.img                = getJSONValue(named: "img", from: values, defaultValue: "")
+        self.href               = getJSONValue(named: "href", from: values, defaultValue: "")
+        self.status             = getJSONValue(named: "status", from: values, defaultValue: 0)
+        self.info               = getJSONValue(named: "info", from: values, defaultValue: "")
+        self.clickCount         = getJSONValue(named: "clickCount", from: values, defaultValue: 0)
+        self.chaptersHref       = getJSONValue(named: "chaptersHref", from: values, defaultValue: "")
+        self.latestUpdateInfo   = getJSONValue(named: "latestUpdateInfo", from: values, defaultValue: "")
+        self.latestUpdateDate   = getJSONValue(named: "latestUpdateDate", from: values, defaultValue: 0)
+    }
+    
+    override public func getJSONValues() -> [String : Any] {
+        return [
+            "id":id ?? "",
+            "name":name ?? "",
+            "author":author ?? "",
+            "img":img ?? "",
+            "href":href ?? "",
+            "status":status ?? 0,
+            "info":info ?? "",
+            "clickCount":clickCount ?? 0,
+            "chaptersHref":chaptersHref ?? "",
+            "latestUpdateInfo":latestUpdateInfo ?? "",
+            "latestUpdateDate":latestUpdateDate ?? 0,
+        ]
+    }
+
+    
     public func description() {
+        print(self.jsonEncodedString())
         print("书名:《\(self.name ?? "null")》 作者:\(self.author ?? "null") 链接:\(self.href ?? "null")")
     }
 }

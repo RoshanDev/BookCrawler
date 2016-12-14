@@ -55,16 +55,6 @@ class ROSMongoDBManager {
             return bookfinded
         }
         return nil
-//        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: book), sort: nil, update: nil, fields: nil, remove: false, upsert: false, new: false))!;
-//        switch result {
-//        case .replyDoc:
-//            
-//            let book = Book()
-//            return book
-//        default:
-//            return nil
-//
-//        }
     }
     
     //更新书籍信息
