@@ -29,7 +29,7 @@ public class CrawLib {
     }
     
     //点击列表页路由事件
-    static func crawSumClickList(listIndex: Int = 1) -> Dictionary<String, Any> {
+    static func crawSumClickList(listIndex: Int = 1, ignoreIndex: Int = 1) -> Dictionary<String, Any> {
         
         let crawUri = "http://www.quanshu.net/all/allvisit_0_0_0_0_0_0_" + String(listIndex) + ".html"
         guard let crawUrl = URL(string: crawUri) else {
@@ -47,7 +47,13 @@ public class CrawLib {
             let books = CrawLib.crawClickList(html: myHTMLString)
             
             // TODO: 开启多线程，现在太慢了
-            for book in books {
+            for (index,book) in books.enumerated() where index > ignoreIndex
+            {
+                // index 在这儿是常亮，0，也是日了狗了
+//                if index <= ignoreIndex {
+//                    print("书籍《\(book.name)》 已经抓取过了，忽略")
+//                    break
+//                }
                 if let bookResults = CrawLib.crawBookInfo(href: book.href) {
                     let completebook = bookResults[1] as! Book
                     if let chapters = CrawLib.crawBookChaptersInfo(book: completebook) {
@@ -337,9 +343,12 @@ public class CrawLib {
             
             let tempXpath = "script"
             
-            for tempElement in (contentElement?.xpath(tempXpath))! {
-                tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
+            if let contentElements = contentElement?.xpath(tempXpath) {
+                for tempElement in contentElements {
+                    tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
+                }
             }
+            
             
             chapter.content = tempContent
             chapter.updateTime = CrawLib.timeStamp()
