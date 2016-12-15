@@ -69,3 +69,4 @@ Packages/
 BookCrawler.xcodeproj
 Tests/
 webroot/
+Log/

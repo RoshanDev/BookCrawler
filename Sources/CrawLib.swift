@@ -12,6 +12,7 @@ import Foundation
 import Kanna
 import MongoDB
 import CoreFoundation
+import PerfectLogger
 
 //import SwiftyJSON
 
@@ -29,25 +30,31 @@ public class CrawLib {
     }
     
     //点击列表页路由事件
-    static func crawSumClickList(listIndex: Int = 1, ignoreIndex: Int = 1) -> Dictionary<String, Any> {
-        
+    static func crawSumClickList(listIndex: Int = 1) -> Dictionary<String, Any> {
+        LogFile.location = "/Users/roshan/Developer/Swift/BookCrawler/Log/bookCrawlerLog.log"
+
         let crawUri = "http://www.quanshu.net/all/allvisit_0_0_0_0_0_0_" + String(listIndex) + ".html"
+        LogFile.debug("开始抓取\(crawUri)列表页书籍")
+
         guard let crawUrl = URL(string: crawUri) else {
             let message = "Error: \(crawUri) doesn't seem to be a valid URL"
+            LogFile.error(message)
             return CrawLib.showResponse(code: 0, message: message, data: nil)
         }
         
         do {
-//            let cfEnc = CFStringEncodings.GB_18030_2000
-//            let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
             let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
 
             let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-            //let htmlDic =
-            let books = CrawLib.crawClickList(html: myHTMLString)
+
+            guard let books = CrawLib.crawClickList(html: myHTMLString) else {
+                let message = "抓取\(crawUri)列表页失败"
+                LogFile.error(message)
+                return CrawLib.showResponse(code: 0, message: message, data: nil)
+            }
             
-            // TODO: 开启多线程，现在太慢了
-            for (index,book) in books.enumerated() where index > ignoreIndex
+            // TODO: 开启多线程，现在太慢了//.enumerated() where index >= ignoreIndex
+            for book in books
             {
                 // index 在这儿是常亮，0，也是日了狗了
 //                if index <= ignoreIndex {
@@ -56,31 +63,35 @@ public class CrawLib {
 //                }
                 if let bookResults = CrawLib.crawBookInfo(href: book.href) {
                     let completebook = bookResults[1] as! Book
+                    LogFile.debug("开始更新书籍《\(book.name)》章节数据")
                     if let chapters = CrawLib.crawBookChaptersInfo(book: completebook) {
                         for chapter in chapters {
                             chapter.bookID = bookResults[0] as! String
-                            _ = CrawLib.crawChapterDetailInfo(book: completebook, chapter: chapter)
+                            let replyChapter = CrawLib.crawChapterDetailInfo(book: completebook, chapter: chapter)
+                            if replyChapter != nil {
+                                LogFile.debug("插入章节《\(chapter.name!)》数据成功")
+                            }else {
+                                LogFile.error("插入章节《\(chapter.name!)》数据失败")
+                            }
                         }
                     }else {
-                        print("书籍《\(book.name)》章节列表页插入失败");
+                        LogFile.error("书籍《\(book.name)》章节列表页数据获取失败")
                     }
-
                 }else {
-                    print("书籍《\(book.name)》章节列表页因无bookID插入失败");
+                    LogFile.error("插入书籍《\(book.name)》数据失败")
                 }
-
             }
             
-            // TODO: 需要存储下来已更新的页面index
-            print("第\(listIndex)页数据抓取完毕")
+            LogFile.debug("第\(listIndex)页数据抓取完毕")
             if listIndex > 2541 {
+                LogFile.debug("整站书籍抓取完毕")
                 return ["completed":1]
             }else {
                 _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
                 return ["completed":0]
             }
         } catch let error {
-            print("Error: \(error)")
+            LogFile.error("Error: \(error)")
             // TODO: 需要存储下来已更新的页面index，并写入失败队列
             return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
         }
@@ -116,15 +127,18 @@ public class CrawLib {
     
     // MARK: 抓取、保存网页内容相关函数
     
-    static func crawClickList(html: String)-> [Book] {
+    static func crawClickList(html: String)-> [Book]? {
+
         if let doc = HTML(html: html, encoding: .utf8) {
             let listElement = doc.at_xpath("//*[@id=\"wrapper\"]/div[3]/div/div/div/div[2]/div[2]/div")
             
+            guard let bookEmements = listElement?.xpath("div") else {
+                return nil
+            }
             var books = [Book]()
-            
-            for bookElement in (listElement?.xpath("div"))! {
-                print(bookElement.innerHTML ?? "bookElement.innerHTML nil")
-                
+
+            for bookElement in bookEmements {
+//                print(bookElement.innerHTML ?? "bookElement.innerHTML nil")
                 let aElement = bookElement.at_xpath("a")
                 let href = aElement?["href"]
                 //不能用"//a/h2"，奇怪，为啥
@@ -137,10 +151,9 @@ public class CrawLib {
                 let book: Book = Book(name: (titleElement?.text)!, author: author!, img: (imgElement?["src"])!, href: href!)
                 books.append(book)
             }
-//            ROSMongoDBManager.manager.insertBookinfoArray(bookinfos: books)
             return books
         }
-        return [Book]()
+        return nil
     }
     
     //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据
@@ -150,11 +163,7 @@ public class CrawLib {
     /// - Parameter href: 书籍详情页uri
     /// - Returns: 书籍在 mongodb 中的 oid
     static func crawBookInfo(href: String) -> [Any]? {
-        
-//        let cfEnc = CFStringEncodings.GB_18030_2000
-//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
         let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
-        
         guard let crawUrl = URL(string: href) else {
             let message = "Error: \(href) doesn't seem to be a valid URL"
             print(message)
@@ -217,9 +226,6 @@ public class CrawLib {
             }
             latestUpdateDate = latestUpdateDate?.replacingOccurrences(of: " [", with: "").replacingOccurrences(of: "]", with: "")
             let latestUpdateStamp = CrawLib.stringToTimeStamp(stringTime: latestUpdateDate!)
-
-//            let tempV = CrawLib.timeStampToString(timeStamp: latestUpdateStamp)
-//            print("first \(latestUpdateDate) second \(latestUpdateStamp) third \(tempV)")
             
             let book: Book = Book(name: title!, author: author!, img: img!, href: href, status: statusCode, info: info!, clickCount: clickCount!, chaptersHref: chaptersHref!, latestUpdateInfo: latestUpdateInfo!, latestUpdateDate: latestUpdateStamp)
             
@@ -227,17 +233,15 @@ public class CrawLib {
             
             
             if (result != nil) {
-                print("更新书籍《\(title!)》数据成功")
+                LogFile.debug("开始更新书籍《\(title!)》章节数据")
                 var results = [Any]()
                 results.append(result!)
                 results.append(book)
                 return results
             }else {
-                print("更新书籍《\(title!)》数据失败")
+                LogFile.error("插入书籍《\(title!)》数据失败")
+                return nil
             }
-            
-            return nil
-            
             /*
              //是否需要这样先判断是否有info字段，没有再更新？
              guard let collection: MongoCollection = ROSMongoDBManager.manager.bookinfoCollection else {
@@ -260,8 +264,7 @@ public class CrawLib {
              }
              }*/
         } catch let error{
-            print("获取链接\(href)的书籍详情数据失败")
-            print("Error: \(error)")
+            LogFile.error("获取链接\(href)的书籍详情数据失败，错误\(error)")
         }
         return nil
     }
@@ -274,9 +277,7 @@ public class CrawLib {
             print(message)
             return nil
         }
-        
-//        let cfEnc = CFStringEncodings.GB_18030_2000
-//        let enc = CFStringConvertEncodingToNSStringEncoding(CFStringEncoding(cfEnc.rawValue))
+
         let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
 
         do {
@@ -290,7 +291,10 @@ public class CrawLib {
             let volumeXpath = "//div[@class='clearfix dirconone']"
             //接着取出章节信息
             var chapters = [Chapter]()
-            for volumeElement in (doc?.xpath(volumeXpath))! {
+            guard let volumeElements = doc?.xpath(volumeXpath) else {
+                return nil
+            }
+            for volumeElement in volumeElements {
                 // /div/li/a解析不出来
                 let chapterXpath = "li/a"
                 for chapterElement in volumeElement.xpath(chapterXpath) {
@@ -309,8 +313,6 @@ public class CrawLib {
                 }
                 return chapters
             }
-//            ROSMongoDBManager.manager.insertBookChapters(book: book, chapters: chapters)
-
         } catch {
             
         }
@@ -343,25 +345,24 @@ public class CrawLib {
             
             let tempXpath = "script"
             
-            if let contentElements = contentElement?.xpath(tempXpath) {
-                for tempElement in contentElements {
-                    tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
-                }
+            guard let contentElements = contentElement?.xpath(tempXpath) else {
+                return nil
             }
             
-            
+            for tempElement in contentElements {
+                tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
+            }
+
             chapter.content = tempContent
             chapter.updateTime = CrawLib.timeStamp()
             
             let result = ROSMongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
             if result != nil {
-                print("更新章节《\(chapter.name!)》数据成功")
+                return chapter
             }else {
-                print("更新章节《\(chapter.name!)》数据失败")
+                return nil
             }
-            return chapter
         } catch {
-            print("更新章节《\(chapter.name!)》数据失败")
             return nil
         }
     }
