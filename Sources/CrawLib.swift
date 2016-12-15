@@ -369,6 +369,34 @@ public class CrawLib {
     
     // MARK: 相关工具函数
     
+    //可以通过代理IP请求网络数据
+    static func fetchdata(uri: String, proxyHost: String?, proxyPort: String?, userName: String?, password: String?) {
+        let url = URL(string: uri)
+//        let request = URLRequest(url: url!)
+        let configuration = URLSessionConfiguration.default
+        var connectionProxyDictionary = Dictionary<String, Any>()
+        if proxyHost != nil && proxyPort != nil {
+            connectionProxyDictionary["HTTPEnable"] = 1
+            connectionProxyDictionary[String(kCFStreamPropertyHTTPProxyHost)] = proxyHost
+            connectionProxyDictionary[String(kCFStreamPropertyHTTPProxyPort)] = proxyPort
+            if userName != nil && password != nil {
+                connectionProxyDictionary[String(kCFProxyUsernameKey)] = userName
+                connectionProxyDictionary[String(kCFProxyPasswordKey)] = password
+            }
+            configuration.connectionProxyDictionary = connectionProxyDictionary
+        }
+        let session = URLSession(configuration: configuration)
+        let sessionTask = session.dataTask(with: url!){ (data, response, error) -> Void in
+            if (error != nil) {
+                print(error!.localizedDescription)
+                return
+            }
+            print("成功获取数据")
+        }
+        sessionTask.resume()
+    }
+    
+    
     static func showResponse(code: Int, message: String, data: Dictionary<String, Any>?)-> Dictionary<String, Any>{
         var response: Dictionary<String, Any>
         
