@@ -10,7 +10,9 @@ import PerfectLib
 import PerfectHTTP
 import PerfectHTTPServer
 import MongoDB
-
+import PerfectThread
+import PerfectLogger
+import Foundation
 
 func addURLRoutes() {
     routes.add(uri: "/test", handler: testHandler)
@@ -27,6 +29,21 @@ public func PerfectServerModuleInit() {
 }
 
 func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
+    /*
+    for i in 1...30 {
+//        LogFile.debug("hello\(i)")
+        let queue = Threading.getQueue(name: "testQueue", type: .concurrent)
+        queue.dispatch {
+            Log.debug(message: "\(Thread.current.threadDictionary)，\(Date())，hello\(i)")
+//            Threading.sleep(seconds: 3)
+        }
+    }
+    */
+    // 新浪IP查询接口
+//    CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
+    CrawLib.fetchdata(uri: "http://www.quanshu.net/", proxyHost: "122.72.32.73", proxyPort:"80")
+
+    Log.debug(message: "ROSProxyManager.manager.validIPs = \(ROSProxyManager.validIPs)")
     let returning = "{你好，世界！}"
     response.appendBody(string: returning)
     response.completed()
