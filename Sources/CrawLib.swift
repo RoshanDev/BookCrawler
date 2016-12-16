@@ -375,7 +375,14 @@ public class CrawLib {
     
     // MARK: 相关工具函数
     
-    //可以通过代理IP请求网络数据
+    /// 可以通过代理IP请求网络数据
+    ///
+    /// - Parameters:
+    ///   - uri: 目标网站
+    ///   - proxyHost: 代理Host
+    ///   - proxyPort: 代理端口
+    ///   - userName: 代理用户名
+    ///   - password: 代理密码
     static func fetchdata(uri: String, proxyHost: String?, proxyPort: String?, userName: String? = nil, password: String? = nil) {
         let url = URL(string: uri)
         var request = URLRequest(url: url!)
