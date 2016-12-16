@@ -40,9 +40,11 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
     }
     */
     // 新浪IP查询接口
-//    CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
-    CrawLib.fetchdata(uri: "http://www.quanshu.net/", proxyHost: "122.72.32.73", proxyPort:"80")
+    CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
+//    CrawLib.fetchdata(uri: "http://www.quanshu.net/", proxyHost: "122.72.32.73", proxyPort:"80")
 
+    let proxyManager = ROSProxyManager.manager
+    Log.debug(message: "proxyManager:\(proxyManager)")
     Log.debug(message: "ROSProxyManager.manager.validIPs = \(ROSProxyManager.validIPs)")
     let returning = "{你好，世界！}"
     response.appendBody(string: returning)
