@@ -9,6 +9,7 @@
 import Foundation
 import PerfectThread
 import PerfectLib
+import Dispatch
 
 class ROSProxyManager {
     
@@ -40,6 +41,7 @@ class ROSProxyManager {
         let duration = xiciAPITimeSpace * 60
 //        let timer = Timer(timeInterval: TimeInterval(duration), target: self, selector: #selector(loopFetch), userInfo: nil, repeats: true)
 //        timer.fire()
+        
         let queue = DispatchQueue(label: "com.scourge.bookCrawler.timer")
         timer = DispatchSource.makeTimerSource(queue: queue)
         timer!.scheduleRepeating(deadline: DispatchTime.now(), interval: DispatchTimeInterval.seconds(Int(duration)))
@@ -48,11 +50,16 @@ class ROSProxyManager {
             self?.loopFetch()
         }
         timer!.resume()
+        
     }
     
     func stopLoop() {
         timer?.cancel()
         timer = nil
+    }
+    
+    func runDispatchAfterTimerIfNeeded() {
+        
     }
     
     func loopFetch() {
