@@ -1,5 +1,5 @@
 //
-//  ROSProxyManager.swift
+//  ProxyManager.swift
 //  BookCrawler
 //
 //  Created by roshan on 2016/12/16.
@@ -11,9 +11,9 @@ import PerfectThread
 import PerfectLib
 import Dispatch
 
-class ROSProxyManager {
+class ProxyManager {
     
-    static let manager = ROSProxyManager()
+    static let manager = ProxyManager()
     
     var timer: DispatchSourceTimer?
     /// 西刺代理限制的访问时间间隔

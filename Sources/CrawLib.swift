@@ -235,7 +235,7 @@ public class CrawLib {
             
             let book: Book = Book(name: title!, author: author!, img: img!, href: href, status: statusCode, info: info!, clickCount: clickCount!, chaptersHref: chaptersHref!, latestUpdateInfo: latestUpdateInfo!, latestUpdateDate: latestUpdateStamp)
             
-            let result = ROSMongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
+            let result = MongoDBManager.manager.insertOrUpdateBookinfo(bookinfo: book)
             
             
             if (result != nil) {
@@ -250,7 +250,7 @@ public class CrawLib {
             }
             /*
              //是否需要这样先判断是否有info字段，没有再更新？
-             guard let collection: MongoCollection = ROSMongoDBManager.manager.bookinfoCollection else {
+             guard let collection: MongoCollection = MongoDBManager.manager.bookinfoCollection else {
              return
              }
              let queryBson = BSON()
@@ -362,7 +362,7 @@ public class CrawLib {
             chapter.content = tempContent
             chapter.updateTime = CrawLib.timeStamp()
             
-            let result = ROSMongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
+            let result = MongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
             if result != nil {
                 return chapter
             }else {

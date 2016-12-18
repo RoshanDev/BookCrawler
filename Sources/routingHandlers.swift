@@ -43,9 +43,9 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
     CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
 //    CrawLib.fetchdata(uri: "http://www.quanshu.net/", proxyHost: "122.72.32.73", proxyPort:"80")
 
-    let proxyManager = ROSProxyManager.manager
+    let proxyManager = ProxyManager.manager
     Log.debug(message: "proxyManager:\(proxyManager)")
-    Log.debug(message: "ROSProxyManager.manager.validIPs = \(ROSProxyManager.validIPs)")
+    Log.debug(message: "ProxyManager.manager.validIPs = \(ProxyManager.validIPs)")
     let returning = "{你好，世界！}"
     response.appendBody(string: returning)
     response.completed()
@@ -53,7 +53,7 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
 
 
 func mongoInsertHandler(request: HTTPRequest, _ response: HTTPResponse) {
-    let collection = ROSMongoDBManager.manager.testCollection!
+    let collection = MongoDBManager.manager.testCollection!
     let bson = BSON()
     bson.append(key: "name", string: "Roshan")
     bson.append(key: "age", int: 25)
@@ -64,7 +64,7 @@ func mongoInsertHandler(request: HTTPRequest, _ response: HTTPResponse) {
 
 
 func mongoUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) {
-    let collection = ROSMongoDBManager.manager.testCollection!
+    let collection = MongoDBManager.manager.testCollection!
     let bson = BSON()
     bson.append(key: "name", string: "Roshan")
     
@@ -80,7 +80,7 @@ func mongoUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) {
 }
 
 func mongoInsertOrUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) {
-    let collection = ROSMongoDBManager.manager.testCollection!
+    let collection = MongoDBManager.manager.testCollection!
     let bson = BSON()
     bson.append(key: "name", string: "Roshan")
 //    bson.append(key: "age", string: "57")
@@ -101,7 +101,7 @@ func mongoInsertOrUpdateHandler(request: HTTPRequest, _ response: HTTPResponse) 
 
 func mongoHandler(request: HTTPRequest, _ response: HTTPResponse) {
     
-    let collection = ROSMongoDBManager.manager.testCollection!
+    let collection = MongoDBManager.manager.testCollection!
     
     // 执行查询
     let fnd = collection.find(query: BSON())

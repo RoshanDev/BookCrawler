@@ -1,5 +1,5 @@
 //
-//  ROSMongoDBManager.swift
+//  MongoDBManager.swift
 //  BookCrawler
 //
 //  Created by roshan on 2016/12/11.
@@ -11,7 +11,7 @@ import MongoDB
 //import SwiftyJSON
 //import Genome
 
-class ROSMongoDBManager {
+class MongoDBManager {
     private(set) var client:MongoClient
     private(set) var db: MongoDatabase
     //如果该集合不存在于mongodb中，但是后来使用了insert相关函数，会自动新建该集合，然后执行相关操作
@@ -19,7 +19,7 @@ class ROSMongoDBManager {
     private(set) var chapterCollection: MongoCollection?
     private(set) var testCollection: MongoCollection?
     
-    static let manager = ROSMongoDBManager()
+    static let manager = MongoDBManager()
     
     init() {
         self.client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
@@ -45,19 +45,19 @@ class ROSMongoDBManager {
                 books.append(bookBson)
             }
         }
-        let result = (ROSMongoDBManager.manager.bookinfoCollection?.insert(documents: books))
+        let result = (MongoDBManager.manager.bookinfoCollection?.insert(documents: books))
         print(result ?? "insertBookinfoArray nil")
     }
     
     func fetchBookFromMongoDB(book: Book) -> Book? {
-        let fnd = ROSMongoDBManager.manager.bookinfoCollection?.find(query: self.bookQueryBSON(book: book))
+        let fnd = MongoDBManager.manager.bookinfoCollection?.find(query: self.bookQueryBSON(book: book))
         if let bookBson = fnd?.next() {
             print(bookBson)
             let bookfinded = self.converBSONToBook(bookBSON: bookBson)
             return bookfinded
         }
         return nil
-//        let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: book), sort: nil, update: nil, fields: nil, remove: false, upsert: false, new: false))!;
+//        let result: MongoResult = (MongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: book), sort: nil, update: nil, fields: nil, remove: false, upsert: false, new: false))!;
 //        switch result {
 //        case .replyDoc:
 //            
@@ -74,7 +74,7 @@ class ROSMongoDBManager {
         let queryBSON = self.bookQueryBSON(book: book)
         
         if let updateBSON = self.convertBookToBSON(book: book) {
-            let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.update(selector: queryBSON, update: updateBSON))!
+            let result: MongoResult = (MongoDBManager.manager.bookinfoCollection?.update(selector: queryBSON, update: updateBSON))!
             switch result {
             case MongoResult.error:
                 return false
@@ -93,7 +93,7 @@ class ROSMongoDBManager {
     func insertOrUpdateBookinfo(bookinfo: Book) -> String? {
         if let updateBSON = self.convertBookToBSON(book: bookinfo) {
             //如果该书籍在bookinfo集合中不存在，则插入该书籍
-            let result: MongoResult = (ROSMongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: bookinfo), sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
+            let result: MongoResult = (MongoDBManager.manager.bookinfoCollection?.findAndModify(query: self.bookQueryBSON(book: bookinfo), sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
             
             switch result {
             case MongoResult.replyDoc(let bson):
@@ -121,7 +121,7 @@ class ROSMongoDBManager {
     //插入书籍章节列表信息
     func insertBookChapters(book: Book, chapters: Array<Chapter>) {
         let removeBSON = self.bookQueryBSON(book: book)
-        let collection = ROSMongoDBManager.manager.chapterCollection
+        let collection = MongoDBManager.manager.chapterCollection
         let result: MongoResult = (collection?.remove(selector: removeBSON))!
         switch result {
         case .success:
@@ -142,7 +142,7 @@ class ROSMongoDBManager {
     func insertOrUpdateChapterInfo(chapter: Chapter) -> String? {
         let queryBSON = self.chapterQueryBSON(chapter: chapter)
         let updateBSON = self.convertChapterToBSON(chapter: chapter)
-        let result: MongoResult = (ROSMongoDBManager.manager.chapterCollection?.findAndModify(query: queryBSON, sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
+        let result: MongoResult = (MongoDBManager.manager.chapterCollection?.findAndModify(query: queryBSON, sort: nil, update: updateBSON, fields: nil, remove: false, upsert: true, new: false))!
         
         switch result {
         case MongoResult.replyDoc(let bson):
