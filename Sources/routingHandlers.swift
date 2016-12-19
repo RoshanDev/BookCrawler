@@ -39,10 +39,18 @@ func testHandler(request: HTTPRequest, _ response: HTTPResponse) {
         }
     }
     */
+    
     // 新浪IP查询接口
-    CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
+//    CrawLib.fetchdata(uri: "http://int.dpool.sina.com.cn/iplookup/iplookup.php?format=json", proxyHost: "122.72.32.73", proxyPort:"80")
 //    CrawLib.fetchdata(uri: "http://www.quanshu.net/", proxyHost: "122.72.32.73", proxyPort:"80")
-
+    let ipStr = "49.69.245.215:8998"
+    let valid = ProxyManager.manager.checkProxyIpInfo(proxyIpStr: ipStr)
+    if valid {
+        Log.debug(message: "ip：\(ipStr) 有效")
+    }else {
+        Log.debug(message: "ip：\(ipStr) 无效")
+    }
+    
     let proxyManager = ProxyManager.manager
     Log.debug(message: "proxyManager:\(proxyManager)")
     Log.debug(message: "ProxyManager.manager.validIPs = \(ProxyManager.validIPs)")
