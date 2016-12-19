@@ -25,7 +25,7 @@ class ProxyManager {
     
     var timer: DispatchSourceTimer?
     /// 西刺代理限制的访问时间间隔
-    private let xiciAPITimeSpace = 1 //15 minutes
+    private let xiciAPITimeSpace = 5 //15 minutes
     private let xiciAPIUri = "http://proxy.mimvp.com/api/fetch.php?orderid=860161216105833907&num=10&http_type=2&anonymous=5"
     private var latestFetchTime: Int = 0
     
@@ -78,7 +78,7 @@ class ProxyManager {
 //        guard let iplistStr = try? String(contentsOf: xiciurl, encoding: String.Encoding(rawValue: enc)) else {
 //            return
 //        }
-        iplistStr = "85.133.184.226:8080\r\n103.35.171.113:8080\r\n109.224.54.18:8080\r\n179.182.220.127:8080\r\n80.115.71.206:80\r\n101.128.100.215:8080\r\n110.136.107.172:3128\r\n223.13.64.106:9797\r\n94.23.118.193:80\r\n116.58.246.190:8080\r\n180.250.59.242:8080\r\n77.240.149.26:8080\r\n103.224.186.2:8080\r\n176.193.78.200:8080\r\n123.57.180.234:3128\r\n222.124.146.81:8080\r\n62.210.37.79:8118\r\n118.168.146.224:3128\r\n49.238.38.131:8080\r\n45.123.43.34:8080\r\n31.199.181.130:8080\r\n185.86.6.84:1983\r\n67.205.145.108:8080\r\n202.179.190.130:8080\r\n190.248.134.246:8080\r\n222.124.129.178:8080\r\n88.199.18.27:8090\r\n182.91.141.151:8080\r\n207.150.188.224:3151\r\n113.66.147.18:9999"
+        iplistStr = "85.133.184.226:8080\r\n103.35.171.113:8080\r\n109.224.54.18:8080\r\n179.182.220.127:8080\r\n80.115.71.206:80\r\n101.128.100.215:8080\r\n110.136.107.172:3128\r\n223.13.64.106:9797\r\n94.23.118.193:80\r\n116.58.246.190:8080\r\n180.250.59.242:8080\r\n77.240.149.26:8080\r\n103.224.186.2:8080\r\n176.193.78.200:8080\r\n123.57.180.234:3128\r\n222.124.146.81:8080\r\n62.210.37.79:8118\r\n118.168.146.224:3128\r\n49.238.38.131:8080\r\n45.123.43.34:8080\r\n31.199.181.130:8080\r\n185.86.6.84:1983\r\n67.205.145.108:8080\r\n202.179.190.130:8080\r\n190.248.134.246:8080\r\n222.124.129.178:8080\r\n88.199.18.27:8090\r\n182.91.141.151:8080\r\n207.150.188.224:3151\r\n113.66.147.18:9999"//
         
 //        Log.debug(message: "\(iplistStr)")
         
@@ -100,6 +100,7 @@ class ProxyManager {
                     Log.debug(message: "ip：\(ipStr) 有效")
                     rwLock.doWithWriteLock {
                         ProxyManager.validIPs.append(ipStr)
+                        ProxyManager.unUsedIPs.append(ipStr)
                     }
                 }else {
                     Log.debug(message: "ip：\(ipStr) 无效")
@@ -107,9 +108,6 @@ class ProxyManager {
             }
         }
         
-        for index in 0..<ProxyManager.validIPs.count {
-            ProxyManager.unUsedIPs.append(ProxyManager.validIPs[index])
-        }
         Log.debug(message: "抓取ip的时间\(Date.localDate)")
         LogFile.debug("ProxyManager.validIPs ===>\(ProxyManager.validIPs)")
     }
@@ -186,6 +184,10 @@ class ProxyManager {
     }
     
     static func getFirstUnusedIP() -> (String, String)? {
+        guard unUsedIPs.count > 0 else {
+            return nil
+        }
+        
         let ipStr = unUsedIPs[0]
         unUsedIPs.removeFirst()
         let ipArrs = ipStr.components(separatedBy: ":")

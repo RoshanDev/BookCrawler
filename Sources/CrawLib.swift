@@ -177,7 +177,7 @@ public class CrawLib {
         guard let(ip, port) = ProxyManager.getFirstUnusedIP() else {
             return nil
         }
-        
+        Log.debug(message: "ip=\(ip), port=\(port)")
         guard let data = CrawLib.fetchdata(uri: href, proxyHost: ip, proxyPort: port) else {
             return nil
         }
@@ -445,23 +445,32 @@ public class CrawLib {
         
         let session = URLSession(configuration: configuration)
         var responseData: Data?
+        var getResponse = false
         let event = Threading.Event()
         
         let sessionTask = session.dataTask(with: request){ (data, response, error) -> Void in
             if (error != nil) {
-                print(error as Any)
+                Log.debug(message: "\(error)")
+            }else {
+                responseData = data
             }
-//            else {
-//                let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
-//                if let responseStr = String(data: data!, encoding: String.Encoding(rawValue: enc)) {
-//                    print(responseStr)
-//                }
-//            }
-            responseData = data
+            event.lock()
+            getResponse = true
+            event.signal()
             event.unlock()
         }
+        
         sessionTask.resume()
-        event.lock()
+        
+        while getResponse == false {
+            event.lock()
+            defer { event.unlock() }
+            if getResponse {
+                break
+            }
+            _ = event.wait()
+        }
+
         return responseData
 }
     

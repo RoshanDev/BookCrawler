@@ -46,10 +46,7 @@ internal class ThreadSafeArray<T:Equatable> {
     
     public var count: Int {
         var count = 0
-        var res = rwLock.readLock()
-        while !res {
-            res = rwLock.readLock()
-        }
+        rwLock.readLock()
         count = elements.count
         rwLock.unlock()
         return count
@@ -57,10 +54,7 @@ internal class ThreadSafeArray<T:Equatable> {
     
     public var first:T? {
         var element: T?
-        var res = rwLock.readLock()
-        while !res {
-            res = rwLock.readLock()
-        }
+        rwLock.readLock()
         element = elements.first
         rwLock.unlock()
         return element
@@ -74,10 +68,7 @@ internal class ThreadSafeArray<T:Equatable> {
         }
         get {
             var element: T!
-            var res = rwLock.readLock()
-            while !res {
-                res = rwLock.readLock()
-            }
+            rwLock.readLock()
             element = elements[index]
             rwLock.unlock()
             return element
