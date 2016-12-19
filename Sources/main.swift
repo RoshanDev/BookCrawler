@@ -79,6 +79,8 @@ routes.add(method: .get, uri: "/chapterDetailInfo", handler: {
     }
 )
 
+ProxyManager.manager.startLoop()
+
 
 addURLRoutes()
 
