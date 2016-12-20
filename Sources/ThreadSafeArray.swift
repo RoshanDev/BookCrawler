@@ -41,8 +41,6 @@ internal class ThreadSafeArray<T:Equatable> {
             self.elements.remove(at: 0)
         }
     }
-
-    
     
     public var count: Int {
         var count = 0

@@ -54,7 +54,6 @@ public class CrawLib {
                 return CrawLib.showResponse(code: 0, message: message, data: nil)
             }
             
-            // TODO: 开启多线程，现在太慢了//.enumerated() where index >= ignoreIndex
             for book in books
             {
                 // index 在这儿是常亮，0，也是日了狗了
@@ -160,8 +159,6 @@ public class CrawLib {
         }
         return nil
     }
-    
-    //爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据
     
     /// 爬取书籍详情页数据，如果有数据，则更新数据；若没有，则插入新数据
     ///
@@ -282,7 +279,6 @@ public class CrawLib {
 //        } catch let error{
 //            LogFile.error("获取链接\(href)的书籍详情数据失败，错误\(error)")
 //        }
-        return nil
     }
 
     //爬取书籍目录信息
