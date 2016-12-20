@@ -185,12 +185,7 @@ public class CrawLib {
     /// - Parameter href: 书籍详情页uri
     /// - Returns: 书籍在 mongodb 中的 oid
     static func crawBookInfo(href: String) -> [Any]? {
-//        guard let crawUrl = URL(string: href) else {
-//            let message = "Error: \(href) doesn't seem to be a valid URL"
-//            print(message)
-//            return nil
-//        }
-        
+
         guard let(ip, port) = ProxyManager.getFirstUnusedIP() else {
             return nil
         }
