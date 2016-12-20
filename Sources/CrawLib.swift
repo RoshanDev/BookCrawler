@@ -25,79 +25,99 @@ public class CrawLib {
 //        let lastListIndex = 1
 //        let lastBookIndex = 0
 //        let startListIndex = 1
-        
-        
-        
     }
     
     //点击列表页路由事件
-    static func crawSumClickList(listIndex: Int = 1) -> Dictionary<String, Any> {
+    static func crawSumClickList(listIndex: Int = 1, restartTime: Int = 1) -> Dictionary<String, Any> {
         LogFile.location = "/Users/roshan/Developer/Swift/BookCrawler/Log/bookCrawlerLog.log"
 
         let crawUri = "http://www.quanshu.net/all/allvisit_0_0_0_0_0_0_" + String(listIndex) + ".html"
+
+//        guard let crawUrl = URL(string: crawUri) else {
+//            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
+//            LogFile.error(message)
+//            return CrawLib.showResponse(code: 0, message: message, data: nil)
+//        }
+        guard let(ip, port) = ProxyManager.getFirstUnusedIP() else {
+            return CrawLib.restartCrawSumClickList(listIndex: listIndex, restartTime: (restartTime + 1))
+//            return ["completed":0]
+        }
+        Log.debug(message: "ip=\(ip), port=\(port)")
         LogFile.debug("开始抓取\(crawUri)列表页书籍")
 
-        guard let crawUrl = URL(string: crawUri) else {
-            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
-            LogFile.error(message)
-            return CrawLib.showResponse(code: 0, message: message, data: nil)
+        guard let data = CrawLib.fetchdata(uri: crawUri, proxyHost: ip, proxyPort: port) else {
+//            return ["completed":0]
+            return CrawLib.restartCrawSumClickList(listIndex: listIndex, restartTime: (restartTime + 1))
+        }
+
+        let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+        
+        guard let myHTMLString = String(data: data, encoding: String.Encoding(rawValue: enc)) else {
+//            return ["completed":0]
+            return CrawLib.restartCrawSumClickList(listIndex: listIndex, restartTime: (restartTime + 1))
         }
         
-        do {
-            let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
-
-            let myHTMLString = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-
-            guard let books = CrawLib.crawClickList(html: myHTMLString) else {
-                let message = "抓取\(crawUri)列表页失败"
-                LogFile.error(message)
-                return CrawLib.showResponse(code: 0, message: message, data: nil)
-            }
-            
-            for book in books
-            {
-                // index 在这儿是常亮，0，也是日了狗了
-//                if index <= ignoreIndex {
-//                    print("书籍《\(book.name)》 已经抓取过了，忽略")
-//                    break
-//                }
-                if let bookResults = CrawLib.crawBookInfo(href: book.href) {
-                    let completebook = bookResults[1] as! Book
-                    LogFile.debug("开始更新书籍《\(book.name)》章节数据")
-                    let crawChapterQueue = Threading.getQueue(name: "crawChapter", type: .concurrent)
-                    
-                    if let chapters = CrawLib.crawBookChaptersInfo(book: completebook) {
-                        for chapter in chapters {
-                            crawChapterQueue.dispatch {
-                                chapter.bookID = bookResults[0] as! String
-                                let replyChapter = CrawLib.crawChapterDetailInfo(book: completebook, chapter: chapter)
-                                if replyChapter != nil {
-                                    LogFile.debug("插入章节《\(chapter.name!)》数据成功")
-                                }else {
-                                    LogFile.error("插入章节《\(chapter.name!)》数据失败")
-                                }
+        guard let books = CrawLib.crawClickList(html: myHTMLString) else {
+            let message = "抓取\(crawUri)列表页失败"
+            LogFile.error(message)
+//            return CrawLib.showResponse(code: 0, message: message, data: nil)
+            return CrawLib.restartCrawSumClickList(listIndex: listIndex, restartTime: (restartTime + 1))
+        }
+        
+        for book in books
+        {
+            // index 在这儿是常量，0，也是日了狗了
+            //                if index <= ignoreIndex {
+            //                    print("书籍《\(book.name)》 已经抓取过了，忽略")
+            //                    break
+            //                }
+            if let bookResults = CrawLib.crawBookInfo(href: book.href) {
+                let completebook = bookResults[1] as! Book
+                LogFile.debug("开始更新书籍《\(book.name)》章节数据")
+                let crawChapterQueue = Threading.getQueue(name: "crawChapter", type: .concurrent)
+                
+                if let chapters = CrawLib.crawBookChaptersInfo(book: completebook) {
+                    for chapter in chapters {
+                        crawChapterQueue.dispatch {
+                            chapter.bookID = bookResults[0] as! String
+                            let replyChapter = CrawLib.crawChapterDetailInfo(book: completebook, chapter: chapter)
+                            if replyChapter != nil {
+                                LogFile.debug("插入章节《\(chapter.name!)》数据成功")
+                            }else {
+                                LogFile.error("插入章节《\(chapter.name!)》数据失败")
                             }
                         }
-                    }else {
-                        LogFile.error("书籍《\(book.name)》章节列表页数据获取失败")
                     }
                 }else {
-                    LogFile.error("插入书籍《\(book.name)》数据失败")
+                    LogFile.error("书籍《\(book.name)》章节列表页数据获取失败")
                 }
-            }
-            
-            LogFile.debug("第\(listIndex)页数据抓取完毕")
-            if listIndex > 2541 {
-                LogFile.debug("整站书籍抓取完毕")
-                return ["completed":1]
             }else {
-                _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
-                return ["completed":0]
+                LogFile.error("插入书籍《\(book.name)》数据失败")
             }
-        } catch let error {
-            LogFile.error("Error: \(error)")
-            // TODO: 需要存储下来已更新的页面index，并写入失败队列
-            return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
+        }
+        
+        LogFile.debug("第\(listIndex)页数据抓取完毕")
+        if listIndex > 2541 {
+            LogFile.debug("整站书籍抓取完毕")
+            return ["completed":1]
+        }else {
+            _ = CrawLib.crawSumClickList(listIndex: (listIndex + 1))
+            return ["completed":0]
+        }
+
+//        do {
+//        } catch let error {
+//            LogFile.error("Error: \(error)")
+//            // TODO: 需要存储下来已更新的页面index，并写入失败队列
+//            return CrawLib.showResponse(code: 0, message: error.localizedDescription, data: nil)
+//        }
+    }
+    
+    static func restartCrawSumClickList(listIndex: Int, restartTime: Int = 1) -> Dictionary<String, Any> {
+        if restartTime < 4 {
+            return CrawLib.crawSumClickList(listIndex: listIndex)
+        }else {
+            return ["completed":0]
         }
     }
     
@@ -284,50 +304,58 @@ public class CrawLib {
     //爬取书籍目录信息
     static func crawBookChaptersInfo(book: Book) -> [Chapter]? {
         
-        guard let crawUrl = URL(string: book.chaptersHref) else {
-            let message = "Error: \(book.chaptersHref) doesn't seem to be a valid URL"
-            print(message)
+//        guard let crawUrl = URL(string: book.chaptersHref) else {
+//            let message = "Error: \(book.chaptersHref) doesn't seem to be a valid URL"
+//            print(message)
+//            return nil
+//        }
+
+        guard let(ip, port) = ProxyManager.getFirstUnusedIP() else {
+            return nil
+        }
+        Log.debug(message: "ip=\(ip), port=\(port)")
+        guard let data = CrawLib.fetchdata(uri: book.chaptersHref, proxyHost: ip, proxyPort: port) else {
             return nil
         }
 
         let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
-
-        do {
-            let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-            let doc = HTML(html: html, encoding: .utf8)
-            if doc == nil {
-                return nil
-            }
-            
-            //先取出卷信息
-            let volumeXpath = "//div[@class='clearfix dirconone']"
-            //接着取出章节信息
-            var chapters = [Chapter]()
-            guard let volumeElements = doc?.xpath(volumeXpath) else {
-                return nil
-            }
-            for volumeElement in volumeElements {
-                // /div/li/a解析不出来
-                let chapterXpath = "li/a"
-                for chapterElement in volumeElement.xpath(chapterXpath) {
-                    let chapterName = chapterElement.text
-                    let href = chapterElement["href"]
-                    
-                    var tempStr = chapterElement["title"]
-                    let tempArr = tempStr?.components(separatedBy: "，")
-                    tempStr = tempArr?.last?.replacingOccurrences(of: "共", with: "").replacingOccurrences(of: "字", with: "")
-                    let wordCount = Int(tempStr!)
-                    let chapter = Chapter.init(name: chapterName, href: href, wordCount: wordCount)
-                    chapter.createTime = CrawLib.timeStamp()
-                    chapter.description()
-                    
-                    chapters.append(chapter)
-                }
-                return chapters
-            }
-        } catch {
-            
+        guard let html = String(data: data, encoding: String.Encoding(rawValue: enc)) else {
+            return nil
         }
+
+//        let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
+        let doc = HTML(html: html, encoding: .utf8)
+        if doc == nil {
+            return nil
+        }
+        
+        //先取出卷信息
+        let volumeXpath = "//div[@class='clearfix dirconone']"
+        //接着取出章节信息
+        var chapters = [Chapter]()
+        guard let volumeElements = doc?.xpath(volumeXpath) else {
+            return nil
+        }
+        for volumeElement in volumeElements {
+            // /div/li/a解析不出来
+            let chapterXpath = "li/a"
+            for chapterElement in volumeElement.xpath(chapterXpath) {
+                let chapterName = chapterElement.text
+                let href = chapterElement["href"]
+                
+                var tempStr = chapterElement["title"]
+                let tempArr = tempStr?.components(separatedBy: "，")
+                tempStr = tempArr?.last?.replacingOccurrences(of: "共", with: "").replacingOccurrences(of: "字", with: "")
+                let wordCount = Int(tempStr!)
+                let chapter = Chapter.init(name: chapterName, href: href, wordCount: wordCount)
+                chapter.createTime = CrawLib.timeStamp()
+                chapter.description()
+                
+                chapters.append(chapter)
+            }
+            return chapters
+        }
+
         return nil
     }
     
@@ -335,46 +363,52 @@ public class CrawLib {
     static func crawChapterDetailInfo(book: Book, chapter: Chapter) -> Chapter? {
         let crawUri = book.chaptersHref + "/" + chapter.href!
         
-        guard let crawUrl = URL(string: crawUri) else {
-            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
-            print(message)
+//        guard let crawUrl = URL(string: crawUri) else {
+//            let message = "Error: \(crawUri) doesn't seem to be a valid URL"
+//            print(message)
+//            return nil
+//        }
+
+        guard let(ip, port) = ProxyManager.getFirstUnusedIP() else {
+            return nil
+        }
+        Log.debug(message: "ip=\(ip), port=\(port)")
+        guard let data = CrawLib.fetchdata(uri: crawUri, proxyHost: ip, proxyPort: port) else {
             return nil
         }
 
         let enc = CFStringConvertEncodingToNSStringEncoding(0x0632);
+        guard let html = String(data: data, encoding: String.Encoding(rawValue: enc)) else {
+            return nil
+        }
 
-        do {
-            let html = try String(contentsOf: crawUrl, encoding: String.Encoding(rawValue: enc))
-            let doc = HTML(html: html, encoding: .utf8)
-            if doc == nil {
-                return nil
-            }
-            
-            let contentXpath = "//*[@id=\"content\"]"
-            let contentElement = doc?.at_xpath(contentXpath)
-            
-            var tempContent = contentElement?.text
-            
-            let tempXpath = "script"
-            
-            guard let contentElements = contentElement?.xpath(tempXpath) else {
-                return nil
-            }
-            
-            for tempElement in contentElements {
-                tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
-            }
-
-            chapter.content = tempContent
-            chapter.updateTime = CrawLib.timeStamp()
-            
-            let result = MongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
-            if result != nil {
-                return chapter
-            }else {
-                return nil
-            }
-        } catch {
+        let doc = HTML(html: html, encoding: .utf8)
+        if doc == nil {
+            return nil
+        }
+        
+        let contentXpath = "//*[@id=\"content\"]"
+        let contentElement = doc?.at_xpath(contentXpath)
+        
+        var tempContent = contentElement?.text
+        
+        let tempXpath = "script"
+        
+        guard let contentElements = contentElement?.xpath(tempXpath) else {
+            return nil
+        }
+        
+        for tempElement in contentElements {
+            tempContent = tempContent?.replacingOccurrences(of: tempElement.text!, with: "")
+        }
+        
+        chapter.content = tempContent
+        chapter.updateTime = CrawLib.timeStamp()
+        
+        let result = MongoDBManager.manager.insertOrUpdateChapterInfo(chapter: chapter)
+        if result != nil {
+            return chapter
+        }else {
             return nil
         }
     }
