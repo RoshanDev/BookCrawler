@@ -51,8 +51,10 @@ class ProxyManager {
         timer = DispatchSource.makeTimerSource(queue: queue)
         timer!.scheduleRepeating(deadline: DispatchTime.now(), interval: DispatchTimeInterval.seconds(Int(duration)))
         timer!.setEventHandler { [weak self] in
-            // do whatever you want here
-            self?.loopFetch()
+            
+            if ProxyManager.unUsedIPs.count < 10 {
+                self?.loopFetch()
+            }
         }
         timer!.resume()
     }
