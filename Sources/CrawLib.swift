@@ -440,16 +440,6 @@ public class CrawLib {
             request.setValue(headerValue, forHTTPHeaderField: key)
         }
         
-//        request.setValue("keep-alive", forHTTPHeaderField: "Connection")
-//        request.setValue("1", forHTTPHeaderField: "Upgrade-Insecure-Requests")
-//        request.setValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36", forHTTPHeaderField: "User-Agent")
-//        request.setValue("text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", forHTTPHeaderField: "Accept")
-//        request.setValue("gzip, deflate, sdch", forHTTPHeaderField: "Accept-Encoding")
-//        request.setValue("zh-CN,zh;q=0.8,en;q=0.6", forHTTPHeaderField: "Accept-Language")
-//        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
-//        request.setValue("bdshare_firstime=1481214795739; jieqiHistoryBooks=%5B%7B%22articleid%22%3A%2229935%22%2C%22articlename%22%3A%22%u5112%u9053%u81F3%u5723%22%2C%22chapterid%22%3A%2229524712%22%2C%22chaptername%22%3A%22%u7AE0%20%u8282%u76EE%u5F55%20%u7B2C1861%u7AE0%20%u72D0%u7483%u8DEA%u6C42%22%7D%2C%7B%22articleid%22%3A%224912%22%2C%22articlename%22%3A%22%u81F3%u5C0A%u9E3F%u8499%22%2C%22chapterid%22%3A%221582560%22%2C%22chaptername%22%3A%22%20%u7B2C111%u7AE0%20%u6EE1%u76EE%u75AE%u75CD%u5730%u4ED9%u754C%22%7D%2C%7B%22articleid%22%3A%2216407%22%2C%22articlename%22%3A%22%u840C%u840C%u4ED9%u6E38%u8BB0%22%2C%22chapterid%22%3A%226033691%22%2C%22chaptername%22%3A%22%u7B2C%u4E00%u5377%20%u7B2C%u4E8C%u8282%u5F00%u59CB%u65B0%u751F%u6D3B%22%7D%2C%7B%22articleid%22%3A%221314%22%2C%22articlename%22%3A%22%u6781%u54C1%u4E39%u5E08%22%2C%22chapterid%22%3A%22428538%22%2C%22chaptername%22%3A%22%u5168%u4E66%u7F51%20%u7B2C%u4E09%u7AE0%20%uFF1A%u4E49%u8C6A%u4E91%u5929%22%7D%2C%7B%22articleid%22%3A%2213720%22%2C%22articlename%22%3A%22%u7EDD%u4E16%u5510%u95E8%22%2C%22chapterid%22%3A%224882950%22%2C%22chaptername%22%3A%22%u7B2C%u4E00%u96C6%20%u5929%u68A6%u51B0%u8695%20%u7B2C%u4E00%u7AE0%20%u7075%u7738%u5C11%u5E74%uFF08%u56DB%uFF09%22%7D%2C%7B%22articleid%22%3A%2222602%22%2C%22articlename%22%3A%22%u66A7%u6627%u4E61%u6751%22%2C%22chapterid%22%3A%229012177%22%2C%22chaptername%22%3A%22%u5168%u4E66%u7F51%20%u9732%u51FA%u6000%u7591%u7684%u773C%u795E%22%7D%5D; _gat=1; CNZZDATA1260457973=634994115-1481211144-null%7C1481886176; _ga=GA1.2.1451341691.1481214796", forHTTPHeaderField: "Cookie")
-//        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
-        
         let configuration = URLSessionConfiguration.default
         var connectionProxyDictionary = Dictionary<String, Any>()
         if proxyHost != nil && proxyPort != nil {

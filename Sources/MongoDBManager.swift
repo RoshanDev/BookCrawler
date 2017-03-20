@@ -224,16 +224,7 @@ class MongoDBManager {
     /// - Returns: BSON 数据
     func convertChapterToBSON(chapter: Chapter) -> BSON {
         let chapterBSON = BSON()
-        /*
-         var name: String?
-         var href: String?
-         var wordCount: Int?
-         
-         var content: String?
-         var createTime: Int?
-         var updateTime: Int?
 
-         */
         chapterBSON.append(key: "bookID", string: chapter.bookID)
         chapterBSON.append(key: "name", string: chapter.name ?? "")
         chapterBSON.append(key: "href", string: chapter.href ?? "")

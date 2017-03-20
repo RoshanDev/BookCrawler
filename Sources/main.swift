@@ -47,37 +47,37 @@ routes.add(method: .get, uri: "/detailInfo", handler: {
     }
 )
 
-routes.add(method: .get, uri: "/chaptersInfo", handler: {
-        request, response in
-        
-        let jsonDic = CrawLib.chaptersInfo()
-        
-        response.setHeader(.contentType, value: "application/json")
-        
-        do {
-            try response.setBody(json: jsonDic)
-        } catch  {
-            print("setBody failed")
-        }
-        response.completed()
-    }
-)
+//routes.add(method: .get, uri: "/chaptersInfo", handler: {
+//        request, response in
+//        
+//        let jsonDic = CrawLib.chaptersInfo()
+//        
+//        response.setHeader(.contentType, value: "application/json")
+//        
+//        do {
+//            try response.setBody(json: jsonDic)
+//        } catch  {
+//            print("setBody failed")
+//        }
+//        response.completed()
+//    }
+//)
 
-routes.add(method: .get, uri: "/chapterDetailInfo", handler: {
-        request, response in
-        
-        let jsonDic = CrawLib.chapterDetailInfo()
-        
-        response.setHeader(.contentType, value: "application/json")
-        
-        do {
-            try response.setBody(json: jsonDic)
-        } catch  {
-            print("setBody failed")
-        }
-        response.completed()
-    }
-)
+//routes.add(method: .get, uri: "/chapterDetailInfo", handler: {
+//        request, response in
+//        
+//        let jsonDic = CrawLib.chapterDetailInfo()
+//        
+//        response.setHeader(.contentType, value: "application/json")
+//        
+//        do {
+//            try response.setBody(json: jsonDic)
+//        } catch  {
+//            print("setBody failed")
+//        }
+//        response.completed()
+//    }
+//)
 
 ProxyManager.manager.startLoop()
 
