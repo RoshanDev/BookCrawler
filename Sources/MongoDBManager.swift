@@ -22,7 +22,8 @@ class MongoDBManager {
     static let manager = MongoDBManager()
     
     init() {
-        self.client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
+//        self.client = try! MongoClient(uri: "mongodb://roshan:fh920913@ds129018.mlab.com:29018/rosbookworm")
+        self.client = try! MongoClient(uri: "mongodb://localhost:27017/rosbookworm")
         self.db = client.getDatabase(name: "rosbookworm")
         self.bookinfoCollection = db.getCollection(name: "bookinfo")
         self.chapterCollection = db.getCollection(name: "bookchapter")

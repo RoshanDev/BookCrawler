@@ -24,10 +24,10 @@ class ProxyManager {
     var timer: DispatchSourceTimer?
     /// 西刺代理限制的访问时间间隔
     private let xiciAPITimeSpace = 1.5 //15 minutes
-//    private let xiciAPIUri = "http://proxy.mimvp.com/api/fetch.php?orderid=860161216105833907&num=10&http_type=2&anonymous=5"
+    private let xiciAPIUri = "http://proxy.mimvp.com/api/fetch.php?orderid=860161216105833907&num=10&http_type=2&anonymous=5"
     // FIXME: 大象代理不行啊，一直这样 ERROR|没有找到符合条件的IP 。还是要换米扑啊。或者 checkProxyIpInfo 函数中，可以通过 http 校验
 //    private let xiciAPIUri = "http://tpv.daxiangdaili.com/ip/?tid=555744041828158&num=10&delay=1&category=2&protocol=https&filter=on"
-    private let xiciAPIUri = "http://tpv.daxiangdaili.com/ip/?tid=555744041828158&num=10&delay=3&category=2"
+//    private let xiciAPIUri = "http://tpv.daxiangdaili.com/ip/?tid=555744041828158&num=10&delay=3&category=2"
     private var latestFetchTime: Int = 0
     
     /// 有效 IP 数组
